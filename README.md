@@ -19,3 +19,8 @@
 4. Pack the docker image
 5. Run all test
 6. Send the result to others
+
+
+# How to execute??
+1. bash env.setup.bash
+2. bash build.setup.bash
