@@ -59,7 +59,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}."${TEST_MODULE}"
+OUT_FOLDER_PATH=${RESULT_PATH}/forked/${DATETIME}.${COMMIT}."${TEST_MODULE}"
 
 mkdir -p ${OUT_FOLDER_PATH}
 
@@ -83,28 +83,38 @@ if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 	fi
 	execute_forked_parachain_launch ${PEAQ_DEV_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
 	execute_runtime_upgrade_pytest "peaq-dev" ${TEST_MODULE} ${PEAQ_DEV_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
+fi
+
+if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
+	forked_config_file=`check_and_get_forked_config ${KREST_RPC_ENDPOINT} "krest"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $forked_config_file
+		exit 1
+	fi
+	fork_folder=`check_and_get_forked_folder ${KREST_RPC_ENDPOINT} "krest"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $fork_folder
+		exit 1
+	fi
+	execute_forked_parachain_launch ${KREST_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
+	execute_runtime_upgrade_pytest "krest" ${TEST_MODULE} ${KREST_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
 	exit 0
 fi
 
-# if [[ $CHAIN == "krest" ]]; then
-# 	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-# 	execute_pytest "krest" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-# 	exit 0
-# fi
-# if [[ $CHAIN == "peaq" ]]; then
-# 	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-# 	execute_pytest "peaq" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-# 	exit 0
-# fi
-# if [[ $CHAIN == "all" ]]; then
-# 	execute_parachain_launch "peaq-dev" ${OUT_FOLDER_PATH}
-# 	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-# 	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-# 	execute_pytest "krest" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-# 	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-# 	execute_pytest "peaq" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-# 	exit 0
-# fi
+if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
+	forked_config_file=`check_and_get_forked_config ${PEAQ_RPC_ENDPOINT} "peaq"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $forked_config_file
+		exit 1
+	fi
+	fork_folder=`check_and_get_forked_folder ${PEAQ_RPC_ENDPOINT} "peaq"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $fork_folder
+		exit 1
+	fi
+	execute_forked_parachain_launch ${PEAQ_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
+	execute_runtime_upgrade_pytest "peaq" ${TEST_MODULE} ${PEAQ_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
+fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
