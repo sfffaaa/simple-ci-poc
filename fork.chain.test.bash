@@ -73,47 +73,55 @@ echo_highlight "Finished build ${COMMIT}"
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 	forked_config_file=`check_and_get_forked_config ${PEAQ_DEV_RPC_ENDPOINT} "peaq-dev"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $forked_config_file
+		echo_error "forked test peaq fail: peaq-dev $forked_config_file"
 		exit 1
 	fi
 	fork_folder=`check_and_get_forked_folder ${PEAQ_DEV_RPC_ENDPOINT} "peaq-dev"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $fork_folder
+		echo_error "forked test peaq fail: peaq-dev $fork_folder"
 		exit 1
 	fi
 	execute_forked_parachain_launch ${PEAQ_DEV_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
 	execute_runtime_upgrade_pytest "peaq-dev" ${TEST_MODULE} ${PEAQ_DEV_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
+	if [ $? -ne 0 ]; then
+		echo_error "forked test peaq fail: peaq-dev test fail"
+	fi
 fi
 
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
 	forked_config_file=`check_and_get_forked_config ${KREST_RPC_ENDPOINT} "krest"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $forked_config_file
+		echo_error "forked test peaq fail: krest $forked_config_file"
 		exit 1
 	fi
 	fork_folder=`check_and_get_forked_folder ${KREST_RPC_ENDPOINT} "krest"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $fork_folder
+		echo_error "forked test peaq fail: krest $fork_folder"
 		exit 1
 	fi
 	execute_forked_parachain_launch ${KREST_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
 	execute_runtime_upgrade_pytest "krest" ${TEST_MODULE} ${KREST_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
-	exit 0
+	if [ $? -ne 0 ]; then
+		echo_error "forked test peaq fail: krest test fail"
+	fi
 fi
 
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
 	forked_config_file=`check_and_get_forked_config ${PEAQ_RPC_ENDPOINT} "peaq"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $forked_config_file
+		echo_error "forked test peaq fail: peaq $forked_config_file"
 		exit 1
 	fi
 	fork_folder=`check_and_get_forked_folder ${PEAQ_RPC_ENDPOINT} "peaq"`
 	if [ $? -ne 0 ]; then
-		echo_highlight $fork_folder
+		echo_error "forked test peaq fail: peaq $fork_folder"
 		exit 1
 	fi
 	execute_forked_parachain_launch ${PEAQ_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
 	execute_runtime_upgrade_pytest "peaq" ${TEST_MODULE} ${PEAQ_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
+	if [ $? -ne 0 ]; then
+		echo_error "forked test peaq fail: peaq test fail"
+	fi
 fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')

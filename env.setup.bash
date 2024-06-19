@@ -41,6 +41,13 @@ subwasm --version > /dev/null 2>&1 || {
 	exit 1
 }
 
+try-runtime --version > /dev/null 2>&1 || {
+	echo "Please install try-runtime"
+	echo "https://paritytech.github.io/try-runtime-cli/try_runtime/"
+	echo "cargo install --git https://github.com/paritytech/try-runtime-cli --locked"
+	exit 1
+}
+
 # Setup the peaq-bc-test
 cd ${WORK_DIRECTORY}
 git clone --branch ${PEAQ_BC_TEST_BRANCH} git@github.com:peaqnetwork/peaq-bc-test.git

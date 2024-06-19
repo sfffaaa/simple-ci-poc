@@ -1,18 +1,15 @@
 #!/bin/bash
 
 source _constant.bash
-source _parachain.bash
-source _test.bash
-source _utils.bash
+source _tryruntime.bash
 
 show_help() {
     echo "Usage: $0 [options]"
-    echo "Usage: ./new.chain.test.bash --chain peaq-dev --test all"
+    echo "Usage: ./try-runtime.test.bash --chain peaq-dev"
     echo ""
     echo "Options:"
     echo "  --help, -h, Display this help and exit"
     echo "  --chain, -p, Specify a chain name to test (peaq-dev/krest/peaq/all)"
-    echo "  --test, -t, Specify a test name to run test suit (all/xcm/test_case_name)"
     # Add more options and descriptions here
 }
 
@@ -27,10 +24,6 @@ while [[ $# -gt 0 ]]; do
         # Add more options handling here if needed
         --chain|-c)
             CHAIN=$2
-            shift
-            ;;
-        --test|-t)
-            TEST_MODULE=$2
             shift
             ;;
         *)
@@ -49,51 +42,34 @@ if [[ -z "$CHAIN" ]]; then
     exit 1
 fi
 
-if [[ -z "$TEST_MODULE" ]]; then
-    echo "Error: --test/-t is required"
-    echo ""
-    show_help
-    exit 1
-fi
-
-
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/new/${DATETIME}.${COMMIT}."${TEST_MODULE}"
+OUT_FOLDER_PATH=${RESULT_PATH}/try-runtime/${DATETIME}.${COMMIT}."${TEST_MODULE}"
 mkdir -p ${OUT_FOLDER_PATH}
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo_build | tee ${OUT_FOLDER_PATH}/build.log
+cargo_build "--features=try-runtime" 2>&1 | tee ${OUT_FOLDER_PATH}/build.log
 echo_highlight "Finished build ${COMMIT}"
 
-# pack image
-r_pack_peaq_docker_img "latest"
-r_pack_peaq_docker_img "${COMMIT}"
-
-echo_highlight "Finished pack docker image, ${COMMIT} + latest"
-
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq-dev" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+	try_runtime_test "peaq-dev" ${PEAQ_DEV_RPC_ENDPOINT} ${PEAQ_DEV_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
-		echo_error "new test peaq fail: peaq-dev test fail"
+		echo_error "Try-runtime peaq-dev error!!!"
 	fi
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-	execute_pytest "krest" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+	try_runtime_test "krest" ${KREST_RPC_ENDPOINT} ${KREST_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
-		echo_error "new test peaq fail: krest test fail"
+		echo_error "Try-runtime krest error!!!"
 	fi
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+	try_runtime_test "peaq" ${PEAQ_RPC_ENDPOINT} ${PEAQ_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
-		echo_error "new test peaq fail: peaq test fail"
+		echo_error "Try-runtime peaq error!!!"
 	fi
 fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-echo_highlight "Finish new chain test: From ${DATETIME} to ${FINISH_DATETIME}"
+echo_highlight "Finish try-runtime test: From ${DATETIME} to ${FINISH_DATETIME}"
