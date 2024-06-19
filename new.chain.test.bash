@@ -5,7 +5,7 @@ PEAQ_NETWORK_NODE_FOLDER=${WORK_DIRECTORY}/peaq-network-node
 PEAQ_BC_TEST_FOLDER=${WORK_DIRECTORY}/peaq-bc-test
 PARACHAIN_LAUNCH_FOLDER=${WORK_DIRECTORY}/parachain-launch
 RESULT_PATH="/home/jaypan/Work/peaq/CI/results"
-DATETIME=$(date '+%Y-%m-%d-%H-%M-%S')
+DATETIME=$(date '+%Y-%m-%d-%H-%M')
 SLEEP_TIME=120
 
 show_help() {
@@ -39,12 +39,12 @@ r_parachain_generate() {
 
 r_parachain_down() {
 	cd ${WORK_DIRECTORY}/parachain-launch/yoyo
-	docker compose down -v
+  	docker compose down -v | tee ${log_file}
 }
 
 r_parachain_up() {
 	cd ${WORK_DIRECTORY}/parachain-launch/yoyo
-	docker compose up -d
+	docker compose up --build -d
 }
 
 execute_parachain_launch() {
@@ -52,7 +52,7 @@ execute_parachain_launch() {
 	local log_file=$2/${chain_name}
     echo_highlight "Running ${chain_name}"
 
-    r_parachain_down | tee ${log_file}
+	r_parachain_down | tee ${log_file}
     r_parachain_generate ci.config/config.parachain.${chain_name}.yml | tee ${log_file}
     r_parachain_up | tee ${log_file}
 
@@ -75,7 +75,6 @@ execute_pytest() {
             pytest -m ${test_module} | tee ${log_file}
         else
             pytest -k ${test_module} | tee ${log_file}
-            exit 1
         fi  
     )   
 }
@@ -123,7 +122,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}-${COMMIT}
+OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}."${TEST_MODULE}"
 mkdir -p ${OUT_FOLDER_PATH}
 
 echo_highlight "Start build for the node ${COMMIT}"
@@ -156,8 +155,12 @@ if [[ $CHAIN == "all" ]]; then
 	execute_parachain_launch "peaq-dev" ${OUT_FOLDER_PATH}
 	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
 	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+	execute_pytest "krest" ${TEST_MODULE} ${OUT_FOLDER_PATH}
 	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+	execute_pytest "peaq" ${TEST_MODULE} ${OUT_FOLDER_PATH}
 	exit 0
 fi
+
+FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
+
+echo_highlight "Finish, From ${DATETIME} to ${FINISH_DATETIME}"

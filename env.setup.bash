@@ -46,10 +46,16 @@ git clone --branch ${PEAQ_NETWORK_NODE_BRANCH} git@github.com:peaqnetwork/peaq-n
 
 # Setup the parachain-launch
 cd ${WORK_DIRECTORY}
-git clone --branch ${PARACHAIN_LAUNCH_BRANCH} git@github.com:peaqnetwork/parachain-launch.git;
-cd ${WORK_DIRECTORY}/parachain-launch;
+git clone --branch ${PARACHAIN_LAUNCH_BRANCH} git@github.com:peaqnetwork/parachain-launch.git
+cd ${WORK_DIRECTORY}/parachain-launch
 yarn build
 # error detective-postcss@5.1.1: The engine "node" is incompatible with this module. Expected version "12.x || 14.x || 16.x". Got "18.19.1"
 # nvm install 16
 # nvm use 16
 yarn install
+
+# Setup the parachain-launch's fork-off-project
+cd ${WORK_DIRECTORY}/parachain-launch
+git submodule update --init --recursive
+cd fork-off-substrate
+npm install
