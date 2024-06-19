@@ -1,4 +1,6 @@
-WORK_DIRECTORY="/home/jaypan/Work/peaq/CI"
+#!/bin/bash
+
+source _constant.bash
 
 deactive || echo "No need to deactivate venv"
 cd ${WORK_DIRECTORY}

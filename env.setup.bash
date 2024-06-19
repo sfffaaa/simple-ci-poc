@@ -1,9 +1,6 @@
-# Setup the projects
+#!/bin/bash
 
-WORK_DIRECTORY="/home/jaypan/Work/peaq/CI"
-PEAQ_NETWORK_NODE_BRANCH="dev"
-PEAQ_BC_TEST_BRANCH="main"
-PARACHAIN_LAUNCH_BRANCH="feat/simple-ci"
+source _constant.bash
 
 # Check git install or not
 git --version > /dev/null 2>&1 || {
