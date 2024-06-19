@@ -1,14 +1,5 @@
 # simple-ci-poc
 
-## Setup enviroment
-1. Clone the peaq-bc-test
-	1.1. Setup the venv enviroment
-2. Clone the peaq-network-node
-3. Clone the parachain-staking
-4. Install the docker compose
-5. Setup some binary alias and tools
-
-
 ## Runt the CI server
 1. Execute the Python server
 
@@ -24,3 +15,5 @@
 # How to execute??
 1. bash env.setup.bash
 2. bash build.setup.bash
+3. bash new.chain.test.bash
+4. bash fork.chain.test.bash
