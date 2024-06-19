@@ -1,13 +1,14 @@
 #!/bin/bash
 
 source _constant.bash
-
-BINARY_FOLDER="/home/jaypan/Work/peaq/CI/binary"
+source _utils.bash
+source _parachain.bash
+source _test.bash
 
 
 show_help() {
     echo "Usage: $0 [options]"
-    echo "Usage: ./forkchain.test.bash --chain peaq-dev --test all"
+    echo "Usage: ./fork.chain.test.bash --chain peaq-dev --test all"
     echo ""
     echo "Options:"
     echo "  --help, -h, Display this help and exit"
@@ -69,18 +70,19 @@ echo_highlight "Finished build ${COMMIT}"
 
 
 # we don't need to pack image
-if [[ $CHAIN == "peaq-dev" ]]; then
-	FORKED_CONFIG_FILE="scripts/config.parachain.peaq-dev.forked.v0.0.17.yml" \
-	RPC_ENDPOINT="https://rpcpc1-qa.agung.peaq.network" \
-	DOCKER_COMPOSE_FOLDER="yoyo" \
-	FORK_FOLDER="/home/jaypan/Work/peaq/fork-test/fork-binary/peaq-dev-v0.0.17" \
-	KEEP_COLLATOR="false" \
-	KEEP_ASSET="true" \
-	KEEP_PARACHAIN="false" \
-	sh -e -x forked.generated.sh
-
-	execute_forked_chain_launch "peaq-dev" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
+if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
+	forked_config_file=`check_and_get_forked_config ${PEAQ_DEV_RPC_ENDPOINT} "peaq-dev"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $forked_config_file
+		exit 1
+	fi
+	fork_folder=`check_and_get_forked_folder ${PEAQ_DEV_RPC_ENDPOINT} "peaq-dev"`
+	if [ $? -ne 0 ]; then
+		echo_highlight $fork_folder
+		exit 1
+	fi
+	execute_forked_parachain_launch ${PEAQ_DEV_RPC_ENDPOINT} ${forked_config_file} ${fork_folder}
+	execute_runtime_upgrade_pytest "peaq-dev" ${TEST_MODULE} ${PEAQ_DEV_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
 	exit 0
 fi
 

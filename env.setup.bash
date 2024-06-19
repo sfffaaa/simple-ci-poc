@@ -29,6 +29,18 @@ yarn --version > /dev/null 2>&1 || {
 # 	exit 1
 # }
 
+jq --version > /dev/null 2>&1 || {
+	echo "Please install jq"
+	exit 1
+}
+
+subwasm --version > /dev/null 2>&1 || {
+	echo "Please install subwasm"
+	echo "https://github.com/chevdor/subwasm"
+	echo "cargo install --locked --git https://github.com/chevdor/subwasm --tag v0.16.1"
+	exit 1
+}
+
 # Setup the peaq-bc-test
 cd ${WORK_DIRECTORY}
 git clone --branch ${PEAQ_BC_TEST_BRANCH} git@github.com:peaqnetwork/peaq-bc-test.git
