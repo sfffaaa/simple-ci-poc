@@ -14,6 +14,7 @@ SLEEP_TIME=120
 PEAQ_NETWORK_NODE_FOLDER=${WORK_DIRECTORY}/peaq-network-node
 PEAQ_BC_TEST_FOLDER=${WORK_DIRECTORY}/peaq-bc-test
 PARACHAIN_LAUNCH_FOLDER=${WORK_DIRECTORY}/parachain-launch
+CI_FOLDER=${WORK_DIRECTORY}/simple-ci-poc
 PEAQ_DEV_RPC_ENDPOINT="https://rpcpc1-qa.agung.peaq.network"
 KREST_RPC_ENDPOINT="https://erpc-krest.peaq.network"
 PEAQ_RPC_ENDPOINT="https://erpc-mpfn1.peaq.network"
@@ -31,3 +32,5 @@ PEAQ_RUNTIME_MODULE_PATH=${WORK_DIRECTORY}/peaq-network-node/${PEAQ_BUILD_RUNTIM
 FORK_KEEP_COLLATOR="false"
 FORK_KEEP_ASSET="true"
 FORK_KEEP_PARACHAIN="false"
+
+FORKED_COLLATOR_CHAIN_FOLDER="${PARACHAIN_LAUNCH_FOLDER}/chain-folder-need-delete"

@@ -26,7 +26,6 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    print(args.chain)
 
     if args.chain not in CHAIN_DEC_FILE:
         raise IOError(f'Chain {args.chain} not supported')

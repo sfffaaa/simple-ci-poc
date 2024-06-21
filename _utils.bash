@@ -62,3 +62,42 @@ check_and_get_forked_config() {
 	fi
 	echo $config
 }
+
+
+get_parachain_id() {
+	local chain_name=$1
+	if [ "$chain_name" == "peaq-dev" ]; then
+	  echo "2000"
+	elif [ "$chain_name" == "krest" ]; then
+	  echo "2241"
+	elif [ "$chain_name" == "peaq" ]; then
+	  echo "3338"
+	else
+	  echo "Unknown parachain type: $TYPE"
+	  exit 1
+	fi
+}
+
+get_parachain_launch_chain_spec() {
+	local chain_name=$1
+	local parachain_id=`get_parachain_id $chain_name`
+	if [ $? -ne 0 ]; then
+		echo_error "cannot get the parachain_id: ${chain_name}"
+		exit 1
+	fi
+	if [ "$chain_name" == "peaq-dev" ]; then
+	  echo "dev-local-${parachain_id}.json"
+	elif [ "$chain_name" == "krest" ]; then
+	  echo "krest-local-${parachain_id}.json"
+	elif [ "$chain_name" == "peaq" ]; then
+	  echo "peaq-local-${parachain_id}.json"
+	else
+	  echo "Unknown parachain type: $chain_name"
+	  exit 1
+	fi
+}
+
+get_code_key() {
+	cd ${CI_FOLDER}
+	CHAIN_PWD=$1 python3 tools/get_code.py --chain $2
+}
