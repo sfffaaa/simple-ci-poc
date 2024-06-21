@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from src.docker_logs import get_docker_service
 import argparse
 import os
