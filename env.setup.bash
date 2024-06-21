@@ -48,6 +48,12 @@ try-runtime --version > /dev/null 2>&1 || {
 	exit 1
 }
 
+subkey --version > /dev/null 2>&1 || {
+	echo "Please install subkey"
+	echo "cargo install --force subkey --git https://github.com/paritytech/substrate"
+	exit 1
+}
+
 # Setup the peaq-bc-test
 cd ${WORK_DIRECTORY}
 git clone --branch ${PEAQ_BC_TEST_BRANCH} git@github.com:peaqnetwork/peaq-bc-test.git

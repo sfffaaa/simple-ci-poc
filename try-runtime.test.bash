@@ -2,6 +2,7 @@
 
 source _constant.bash
 source _tryruntime.bash
+source _utils.bash
 
 show_help() {
     echo "Usage: $0 [options]"
@@ -44,7 +45,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/try-runtime/${DATETIME}.${COMMIT}."${TEST_MODULE}"
+OUT_FOLDER_PATH=${RESULT_PATH}/try-runtime/${DATETIME}.${COMMIT}
 mkdir -p ${OUT_FOLDER_PATH}
 
 echo_highlight "Start build for the node ${COMMIT}"
@@ -52,19 +53,19 @@ cargo_build "--features=try-runtime" 2>&1 | tee ${OUT_FOLDER_PATH}/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	try_runtime_test "peaq-dev" ${PEAQ_DEV_RPC_ENDPOINT} ${PEAQ_DEV_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
+	try_runtime_test "peaq-dev" ${PEAQ_DEV_WSS_ENDPOINT} ${PEAQ_DEV_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
 		echo_error "Try-runtime peaq-dev error!!!"
 	fi
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	try_runtime_test "krest" ${KREST_RPC_ENDPOINT} ${KREST_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
+	try_runtime_test "krest" ${KREST_WSS_ENDPOINT} ${KREST_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
 		echo_error "Try-runtime krest error!!!"
 	fi
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	try_runtime_test "peaq" ${PEAQ_RPC_ENDPOINT} ${PEAQ_RUNTIME_MODULE_PATH}  ${OUT_FOLDER_PATH}
+	try_runtime_test "peaq" ${PEAQ_WSS_ENDPOINT} ${PEAQ_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
 		echo_error "Try-runtime peaq error!!!"
 	fi
