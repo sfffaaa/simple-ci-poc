@@ -48,6 +48,8 @@ COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
 OUT_FOLDER_PATH=${RESULT_PATH}/try-runtime/${DATETIME}.${COMMIT}
 mkdir -p ${OUT_FOLDER_PATH}
 
+echo_info "Start try-runtime.test.bash"
+
 echo_highlight "Start build for the node ${COMMIT}"
 cargo_build "--features=try-runtime" 2>&1 | tee ${OUT_FOLDER_PATH}/build.log
 echo_highlight "Finished build ${COMMIT}"

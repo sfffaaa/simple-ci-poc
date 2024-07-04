@@ -8,8 +8,8 @@ import os
 
 CHAIN_DEC_FILE = {
     'peaq-dev': 'etc/peaq-dev-dec.json',
-    # 'peaq': 'peaq-dec.json',
-    # 'krest': 'krest-dec.json',
+    'peaq': 'etc/peaq-dec.json',
+    'krest': 'etc/krest-dec.json',
 }
 
 

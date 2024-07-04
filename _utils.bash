@@ -2,6 +2,10 @@
 
 source _constant.bash
 
+echo_info()  {
+    echo -e "\033[42;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
+}
+
 echo_highlight()  {
     echo -e "\033[43;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
 }

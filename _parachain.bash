@@ -54,6 +54,7 @@ execute_forked_parachain_launch_imp() {
     KEEP_PARACHAIN=${FORK_KEEP_PARACHAIN} \
     sh -e -x forked.generated.sh
 
+   	echo_highlight "Sleep 30 for the checking"
     sleep 30
     local peaq_run=`docker ps | grep peaq`
     if [[ $peaq_run == "" ]]; then
@@ -61,6 +62,7 @@ execute_forked_parachain_launch_imp() {
         exit 1
     fi
 
+	echo_highlight "Sleep ${SLEEP_TIME}"
     # Already did the parachain up in the script
     sleep ${SLEEP_TIME}
 }
