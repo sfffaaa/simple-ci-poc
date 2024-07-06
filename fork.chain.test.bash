@@ -59,7 +59,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/forked/${DATETIME}.${COMMIT}."${TEST_MODULE}"
+OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/forked."${TEST_MODULE}"
 
 mkdir -p ${OUT_FOLDER_PATH}
 

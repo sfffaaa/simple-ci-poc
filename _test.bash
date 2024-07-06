@@ -16,6 +16,8 @@ execute_pytest() {
             pytest | tee ${log_file}
         elif [[ $test_module == "xcm" ]]; then
             pytest -m ${test_module} | tee ${log_file}
+        elif [[ $test_module == *".py" ]]; then
+            pytest tests/${test_module} | tee ${log_file}
         else
             pytest -k ${test_module} | tee ${log_file}
         fi  

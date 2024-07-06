@@ -50,7 +50,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/collator/${DATETIME}.${COMMIT}
+OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/collator
 
 mkdir -p ${OUT_FOLDER_PATH}
 
@@ -91,7 +91,8 @@ if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 	if [ $? -ne 0 ]; then
 		echo_error "cannot upgrade"
 	fi
-	# reset_forked_collator_parachain_launch
+	execute_runtime_upgrade_pytest "peaq-dev" "test_did_add" ${PEAQ_DEV_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
+	reset_forked_collator_parachain_launch
 fi
 
 # we don't need to pack image
@@ -119,10 +120,11 @@ if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
 		exit 1
 	fi
 	echo_highlight "start execute_runtime_upgrade_only"
-	execute_runtime_upgrade_only "krest" "${PEAQ_RUNTIME_MODULE_PATH}" "${OUT_FOLDER_PATH}"
+	execute_runtime_upgrade_only "krest" "${KREST_RUNTIME_MODULE_PATH}" "${OUT_FOLDER_PATH}"
 	if [ $? -ne 0 ]; then
 		echo_error "cannot upgrade"
 	fi
+	execute_runtime_upgrade_pytest "krest" "test_did_add" ${KREST_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
 	reset_forked_collator_parachain_launch
 fi
 
@@ -155,6 +157,7 @@ if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
 	if [ $? -ne 0 ]; then
 		echo_error "cannot upgrade"
 	fi
+	execute_runtime_upgrade_pytest "peaq" "test_did_add" ${PEAQ_RUNTIME_MODULE_PATH} ${OUT_FOLDER_PATH}
 	reset_forked_collator_parachain_launch
 fi
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')

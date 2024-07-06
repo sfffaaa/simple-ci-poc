@@ -45,7 +45,7 @@ fi
 
 cd ${PEAQ_NETWORK_NODE_FOLDER}
 COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
-OUT_FOLDER_PATH=${RESULT_PATH}/try-runtime/${DATETIME}.${COMMIT}
+OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/try-runtime
 mkdir -p ${OUT_FOLDER_PATH}
 
 echo_info "Start try-runtime.test.bash"

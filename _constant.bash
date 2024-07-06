@@ -9,7 +9,8 @@ RESULT_PATH="/home/jaypan/Work/peaq/CI/results"
 FORKED_BINARY_FOLDER="/home/jaypan/Work/peaq/CI/binary"
 
 
-DATETIME=$(date '+%Y-%m-%d-%H-%M')
+NOW_DATETIME=$(date '+%Y-%m-%d-%H-%M')
+DATETIME=${SET_DATETIME:-$NOW_DATETIME}
 SLEEP_TIME=120
 PEAQ_NETWORK_NODE_FOLDER=${WORK_DIRECTORY}/peaq-network-node
 PEAQ_BC_TEST_FOLDER=${WORK_DIRECTORY}/peaq-bc-test
