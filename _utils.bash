@@ -14,6 +14,12 @@ echo_error()  {
     echo -e "\033[41;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
 }
 
+echo_report() {
+	REPORT_FILE=$1
+	echo -e "\033[43;30m$2\033[0m"
+	echo -e "$2" >> ${REPORT_FILE}
+}
+
 cargo_build() {
 	local argument=$1
     if [[ $argument == "" ]]; then
