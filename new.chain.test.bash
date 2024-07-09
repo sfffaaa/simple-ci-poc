@@ -70,7 +70,7 @@ mkdir -p "${OUT_FOLDER_PATH}"
 echo_info "Start new.chain.test.bash"
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo build | tee "${OUT_FOLDER_PATH}"/build.log
+cargo build --release | tee "${OUT_FOLDER_PATH}"/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 # pack image

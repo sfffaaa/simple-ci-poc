@@ -55,7 +55,7 @@ mkdir -p "${OUT_FOLDER_PATH}"
 echo_info "Start try-runtime.test.bash"
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo build "--features=try-runtime" 2>&1 | tee "${OUT_FOLDER_PATH}"/build.log
+cargo build --release --features=try-runtime | tee "${OUT_FOLDER_PATH}"/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then

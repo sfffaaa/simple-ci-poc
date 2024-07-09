@@ -54,20 +54,20 @@ START_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
 mkdir -p "${OUT_FOLDER_PATH}"
 
-# echo_info "Start evm.wasm.bash"
+echo_info "Start evm.wasm.bash"
 
-# echo_highlight "Start build for the node ${COMMIT}"
-# cargo_build | tee ${OUT_FOLDER_PATH}/build.log
-# echo_highlight "Finished build ${COMMIT}"
+echo_highlight "Start build for the node ${COMMIT}"
+cargo build --release | tee ${OUT_FOLDER_PATH}/build.log
+echo_highlight "Finished build ${COMMIT}"
 
 # pack image
-# r_pack_peaq_docker_img "latest"
-# r_pack_peaq_docker_img "${COMMIT}"
+r_pack_peaq_docker_img "latest"
+r_pack_peaq_docker_img "${COMMIT}"
 
-# echo_highlight "Finished pack docker image, ${COMMIT} + latest"
+echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 # Rebuild the evm related features
-cargo build --release --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
+cargo build --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
 rm -rf evm
 mkdir -p evm
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
