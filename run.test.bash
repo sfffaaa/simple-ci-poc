@@ -4,7 +4,7 @@
 
 DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-echo ${DATETIME}
+echo "${DATETIME}"
 
 SET_DATETIME=${DATETIME} bash evm.wasm.test.bash --chain peaq-dev
 SET_DATETIME=${DATETIME} bash evm.wasm.test.bash --chain krest

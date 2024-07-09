@@ -43,49 +43,49 @@ if [[ -z "$CHAIN" ]]; then
     exit 1
 fi
 
-cd ${PEAQ_NETWORK_NODE_FOLDER}
-COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
+cd "${PEAQ_NETWORK_NODE_FOLDER}" || { echo_red "Error: ${PEAQ_NETWORK_NODE_FOLDER} does not exist"; exit 1; }
+COMMIT=$(git log -n 1 --format=%H | cut -c 1-6)
 OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/try-runtime
 SUMMARY_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/summary
 REPORT_PATH=${OUT_FOLDER_PATH}/report.log
 ERROR_HAPPENED=0
 START_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-mkdir -p ${OUT_FOLDER_PATH}
+mkdir -p "${OUT_FOLDER_PATH}"
 echo_info "Start try-runtime.test.bash"
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo_build "--features=try-runtime" 2>&1 | tee ${OUT_FOLDER_PATH}/build.log
+cargo build "--features=try-runtime" 2>&1 | tee "${OUT_FOLDER_PATH}"/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	try_runtime_test "peaq-dev" ${PEAQ_DEV_WSS_ENDPOINT} ${PEAQ_DEV_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "Try-runtime peaq-dev error!!!"
+	
+	if ! try_runtime_test "peaq-dev" "${PEAQ_DEV_WSS_ENDPOINT}" "${PEAQ_DEV_BUILD_RUNTIME_PATH}"  "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "Try-runtime peaq-dev error!!!"
 		ERROR_HAPPENED=1
 	fi
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	try_runtime_test "krest" ${KREST_WSS_ENDPOINT} ${KREST_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "Try-runtime krest error!!!"
+	
+	if ! try_runtime_test "krest" "${KREST_WSS_ENDPOINT}" "${KREST_BUILD_RUNTIME_PATH}"  "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "Try-runtime krest error!!!"
 		ERROR_HAPPENED=1
 	fi
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	try_runtime_test "peaq" ${PEAQ_WSS_ENDPOINT} ${PEAQ_BUILD_RUNTIME_PATH}  ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "Try-runtime peaq error!!!"
+	
+	if ! try_runtime_test "peaq" "${PEAQ_WSS_ENDPOINT}" "${PEAQ_BUILD_RUNTIME_PATH}"  "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "Try-runtime peaq error!!!"
 		ERROR_HAPPENED=1
 	fi
 fi
 
 if [ ${ERROR_HAPPENED} -ne 1 ]; then
-	echo_report ${REPORT_PATH} "Try-runtime ${CHAIN} success!!"
+	echo_report "${REPORT_PATH}" "Try-runtime ${CHAIN} success!!"
 fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-echo_report ${REPORT_PATH} "Finish try-runtime test: From ${START_DATETIME} to ${FINISH_DATETIME}"
-cat ${REPORT_PATH} >> ${SUMMARY_PATH}
+echo_report "${REPORT_PATH}" "Finish try-runtime test: From ${START_DATETIME} to ${FINISH_DATETIME}"
+cat "${REPORT_PATH}" >> "${SUMMARY_PATH}"
 echo_highlight "Please go to ${SUMMARY_PATH} or ${REPORT_PATH} check the report"

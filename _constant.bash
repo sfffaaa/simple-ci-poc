@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2034
 
 WORK_DIRECTORY="/home/jaypan/Work/peaq/CI"
 PEAQ_NETWORK_NODE_BRANCH="dev"

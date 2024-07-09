@@ -57,20 +57,20 @@ if [[ -z "$TEST_MODULE" ]]; then
 fi
 
 
-cd ${PEAQ_NETWORK_NODE_FOLDER}
-COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
+cd "${PEAQ_NETWORK_NODE_FOLDER}" || { echo_red "Error: ${PEAQ_NETWORK_NODE_FOLDER} not found"; exit 1; }
+COMMIT=$(git log -n 1 --format=%H | cut -c 1-6)
 OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/new."${TEST_MODULE}"
 SUMMARY_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/summary
 REPORT_PATH=${OUT_FOLDER_PATH}/report.log
 ERROR_HAPPENED=0
 START_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-mkdir -p ${OUT_FOLDER_PATH}
+mkdir -p "${OUT_FOLDER_PATH}"
 
 echo_info "Start new.chain.test.bash"
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo_build | tee ${OUT_FOLDER_PATH}/build.log
+cargo build | tee "${OUT_FOLDER_PATH}"/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 # pack image
@@ -80,36 +80,36 @@ r_pack_peaq_docker_img "${COMMIT}"
 echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq-dev" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "new test peaq fail: peaq-dev test fail"
+	execute_parachain_launch "peaq-dev" "${OUT_FOLDER_PATH}"
+	
+	if ! execute_pytest "peaq-dev" "${TEST_MODULE}" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "new test peaq fail: peaq-dev test fail"
 		ERROR_HAPPENED=1
 	fi
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-	execute_pytest "krest" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "new test peaq fail: krest test fail"
+	execute_parachain_launch "krest" "${OUT_FOLDER_PATH}"
+	
+	if ! execute_pytest "krest" "${TEST_MODULE}" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "new test peaq fail: krest test fail"
 		ERROR_HAPPENED=1
 	fi
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-	execute_pytest "peaq" ${TEST_MODULE} ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "new test peaq fail: peaq test fail"
+	execute_parachain_launch "peaq" "${OUT_FOLDER_PATH}"
+	
+	if ! execute_pytest "peaq" "${TEST_MODULE}" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "new test peaq fail: peaq test fail"
 		ERROR_HAPPENED=1
 	fi
 fi
 
 if [ ${ERROR_HAPPENED} -ne 1 ]; then
-	echo_report ${REPORT_PATH} "new chain test finish: ${CHAIN}: success!!"
+	echo_report "${REPORT_PATH}" "new chain test finish: ${CHAIN}: success!!"
 fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-echo_report ${REPORT_PATH} "Finish new chain test: From ${START_DATETIME} to ${FINISH_DATETIME}"
-cat ${REPORT_PATH} >> ${SUMMARY_PATH}
+echo_report "${REPORT_PATH}" "Finish new chain test: From ${START_DATETIME} to ${FINISH_DATETIME}"
+cat "${REPORT_PATH}" >> "${SUMMARY_PATH}"
 echo_highlight "Please go to ${SUMMARY_PATH} or ${REPORT_PATH} check the report"

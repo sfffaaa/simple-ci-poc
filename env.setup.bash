@@ -55,21 +55,21 @@ subkey --version > /dev/null 2>&1 || {
 }
 
 # Setup the peaq-bc-test
-cd ${WORK_DIRECTORY}
-git clone --branch ${PEAQ_BC_TEST_BRANCH} git@github.com:peaqnetwork/peaq-bc-test.git
-python3 -m venv ${WORK_DIRECTORY}/venv
-source ${WORK_DIRECTORY}/venv/bin/activate
-cd ${WORK_DIRECTORY}/peaq-bc-test
+cd "${WORK_DIRECTORY}" || { echo "Please set WORK_DIRECTORY"; exit 1; }
+git clone --branch "${PEAQ_BC_TEST_BRANCH}" git@github.com:peaqnetwork/peaq-bc-test.git
+python3 -m venv "${WORK_DIRECTORY}"/venv
+source "${WORK_DIRECTORY}"/venv/bin/activate
+cd "${WORK_DIRECTORY}"/peaq-bc-test || { echo "Please set WORK_DIRECTORY"; exit 1; }
 pip3 install -r requirements.txt
 
 # Setup the peaq-network-node
-cd ${WORK_DIRECTORY}
-git clone --branch ${PEAQ_NETWORK_NODE_BRANCH} git@github.com:peaqnetwork/peaq-network-node.git
+cd "${WORK_DIRECTORY}" || { echo "Please set WORK_DIRECTORY"; exit 1; }
+git clone --branch "${PEAQ_NETWORK_NODE_BRANCH}" git@github.com:peaqnetwork/peaq-network-node.git
 
 # Setup the parachain-launch
-cd ${WORK_DIRECTORY}
-git clone --branch ${PARACHAIN_LAUNCH_BRANCH} git@github.com:peaqnetwork/parachain-launch.git
-cd ${WORK_DIRECTORY}/parachain-launch
+cd "${WORK_DIRECTORY}" || { echo "Please set WORK_DIRECTORY"; exit 1; }
+git clone --branch "${PARACHAIN_LAUNCH_BRANCH}" git@github.com:peaqnetwork/parachain-launch.git
+cd "${WORK_DIRECTORY}"/parachain-launch || { echo "Please set WORK_DIRECTORY"; exit 1; }
 yarn build
 # error detective-postcss@5.1.1: The engine "node" is incompatible with this module. Expected version "12.x || 14.x || 16.x". Got "18.19.1"
 # nvm install 16
@@ -77,7 +77,7 @@ yarn build
 yarn install
 
 # Setup the parachain-launch's fork-off-project
-cd ${WORK_DIRECTORY}/parachain-launch
+cd "${WORK_DIRECTORY}"/parachain-launch || { echo "Please set WORK_DIRECTORY"; exit 1; }
 git submodule update --init --recursive
-cd fork-off-substrate
+cd fork-off-substrate || { echo "Cannot find fork-off-substrate"; exit 1; }
 npm install

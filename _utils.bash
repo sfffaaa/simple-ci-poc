@@ -3,21 +3,21 @@
 source _constant.bash
 
 echo_info()  {
-    echo -e "\033[42;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
+    echo -e "\033[42;30m$1\033[0m" | tee -a "${OUT_FOLDER_PATH}"/overall
 }
 
 echo_highlight()  {
-    echo -e "\033[43;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
+    echo -e "\033[43;30m$1\033[0m" | tee -a "${OUT_FOLDER_PATH}"/overall
 }
 
 echo_error()  {
-    echo -e "\033[41;30m$1\033[0m" | tee -a ${OUT_FOLDER_PATH}/overall
+    echo -e "\033[41;30m$1\033[0m" | tee -a "${OUT_FOLDER_PATH}"/overall
 }
 
 echo_report() {
 	REPORT_FILE=$1
 	echo -e "\033[43;30m$2\033[0m"
-	echo -e "$2" >> ${REPORT_FILE}
+	echo -e "$2" >> "${REPORT_FILE}"
 }
 
 cargo_build() {
@@ -25,52 +25,55 @@ cargo_build() {
     if [[ $argument == "" ]]; then
         cargo build --release
     else
-        cargo build --release ${argument}
+        cargo build --release "${argument}"
     fi  
 }
 
 r_pack_peaq_docker_img() {
-    cd ${PEAQ_NETWORK_NODE_FOLDER}
+    cd "${PEAQ_NETWORK_NODE_FOLDER}" || exit
     local docker_tag="peaq_para_node:${1:-latest}"
     docker build -f scripts/Dockerfile.parachain-launch -t "${docker_tag}" .
 }
 
 get_spec_version() {
 	local endpoint=$1
-	local version=`curl -s -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"chain_getRuntimeVersion","params":[],"id":1}' ${endpoint} | jq '.result.specVersion'`
+	local version
+	version=$(curl -s -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"chain_getRuntimeVersion","params":[],"id":1}' "${endpoint}" | jq '.result.specVersion')
 	echo "$version"
 }
 
 check_and_get_forked_folder() {
 	local endpoint=$1
 	local chain_name=$2
-	local version="$chain_name-v0.0.$(get_spec_version $endpoint)"
+	local version
+	version="$chain_name-v0.0.$(get_spec_version "$endpoint")"
 
 	local folder=${FORKED_BINARY_FOLDER}/$version
-	if ! [ -d $folder ]; then
+	if ! [ -d "$folder" ]; then
 		echo_highlight "$folder: not exist, force exit"
 		exit 1
 	fi
 
 	local binary=$folder/peaq-node
-	if ! [ -f $binary ]; then
+	if ! [ -f "$binary" ]; then
 		echo_highlight "$binary: not exist, force exit"
 		exit 1
 	fi
-	echo $folder
+	echo "$folder"
 }
 
 check_and_get_forked_config() {
 	local endpoint=$1
 	local chain_name=$2
-	local version=$(get_spec_version $endpoint)
+	local version
+	version=$(get_spec_version "$endpoint")
 
 	local config="${PARACHAIN_LAUNCH_FOLDER}/scripts/config.parachain.${chain_name}.forked.v0.0.${version}.yml"
-	if ! [ -f $config ]; then
+	if ! [ -f "$config" ]; then
 		echo_highlight "$config: not exist, force exit"
 		exit 1
 	fi
-	echo $config
+	echo "$config"
 }
 
 
@@ -90,8 +93,9 @@ get_parachain_id() {
 
 get_parachain_launch_chain_spec() {
 	local chain_name=$1
-	local parachain_id=`get_parachain_id $chain_name`
-	if [ $? -ne 0 ]; then
+	local parachain_id
+	
+	if ! parachain_id=$(get_parachain_id "$chain_name"); then
 		echo_error "cannot get the parachain_id: ${chain_name}"
 		exit 1
 	fi
@@ -108,6 +112,6 @@ get_parachain_launch_chain_spec() {
 }
 
 get_code_key() {
-	cd ${CI_FOLDER}
-	CHAIN_PWD=$1 python3 tools/get_code.py --chain $2
+	cd "${CI_FOLDER}" || exit
+	CHAIN_PWD=$1 python3 tools/get_code.py --chain "$2"
 }

@@ -44,7 +44,7 @@ if [[ -z "$CHAIN" ]]; then
     exit 1
 fi
 
-cd "${PEAQ_NETWORK_NODE_FOLDER}" || { echo_highlight "Error... "; exit 1; }
+cd "${PEAQ_NETWORK_NODE_FOLDER}" || { echo_report "${REPORT_PATH}" "Error: ${PEAQ_NETWORK_NODE_FOLDER} not found"; exit 1; }
 COMMIT=$(git log -n 1 --format=%H | cut -c 1-6)
 OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/evm.wasm
 SUMMARY_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/summary
