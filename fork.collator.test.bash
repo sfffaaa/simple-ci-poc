@@ -105,7 +105,7 @@ if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 		echo_report ${REPORT_PATH} "cannot pass test"
 		ERROR_HAPPENED=1
 	fi
-	reset_forked_collator_parachain_launch
+	reset_forked_collator
 fi
 
 # we don't need to pack image
@@ -147,7 +147,7 @@ if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
 		echo_report ${REPORT_PATH} "cannot pass test"
 		ERROR_HAPPENED=1
 	fi
-	reset_forked_collator_parachain_launch
+	reset_forked_collator
 fi
 
 # we don't need to pack image
@@ -189,7 +189,7 @@ if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
 		echo_report ${REPORT_PATH} "cannot pass test"
 		ERROR_HAPPENED=1
 	fi
-	reset_forked_collator_parachain_launch
+	reset_forked_collator
 fi
 
 if [ ${ERROR_HAPPENED} -ne 1 ]; then

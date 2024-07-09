@@ -29,9 +29,18 @@ PEAQ_BUILD_RUNTIME_PATH=target/release/wbuild/peaq-runtime/peaq_runtime.compact.
 PEAQ_DEV_RUNTIME_MODULE_PATH=${WORK_DIRECTORY}/peaq-network-node/${PEAQ_DEV_BUILD_RUNTIME_PATH}
 KREST_RUNTIME_MODULE_PATH=${WORK_DIRECTORY}/peaq-network-node/${KREST_BUILD_RUNTIME_PATH}
 PEAQ_RUNTIME_MODULE_PATH=${WORK_DIRECTORY}/peaq-network-node/${PEAQ_BUILD_RUNTIME_PATH}
+PEAQ_NODE_BINARY_PATH=${PEAQ_NETWORK_NODE_FOLDER}/target/release/peaq-node
+PEAQ_DEV_ORI_EVM_WASM_PATH=${PEAQ_NETWORK_NODE_FOLDER}/target/release/wbuild/peaq-dev-runtime/peaq_dev_runtime.wasm
+KREST_ORI_EVM_WASM_PATH=${PEAQ_NETWORK_NODE_FOLDER}/target/release/wbuild/peaq-krest-runtime/peaq_krest_runtime.wasm
+PEAQ_ORI_EVM_WASM_PATH=${PEAQ_NETWORK_NODE_FOLDER}/target/release/wbuild/peaq-runtime/peaq_runtime.wasm
+
+PEAQ_DEV_WASM_DST_FOLDER_PATH=${PEAQ_NETWORK_NODE_FOLDER}/evm/peaq-dev-wasm
+KREST_WASM_DST_FOLDER_PATH=${PEAQ_NETWORK_NODE_FOLDER}/evm/krest-wasm
+PEAQ_WASM_DST_FOLDER_PATH=${PEAQ_NETWORK_NODE_FOLDER}/evm/peaq-wasm
 
 FORK_KEEP_COLLATOR="false"
 FORK_KEEP_ASSET="true"
 FORK_KEEP_PARACHAIN="false"
 
 FORKED_COLLATOR_CHAIN_FOLDER="${PARACHAIN_LAUNCH_FOLDER}/chain-folder-need-delete"
+EVM_NODE_CHAIN_FOLDER="${PARACHAIN_LAUNCH_FOLDER}/evm-node-folder-need-delete"

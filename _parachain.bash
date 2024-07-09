@@ -117,8 +117,8 @@ execute_another_collator_node() {
     # Start to setup
     cd ${PARACHAIN_LAUNCH_FOLDER}
 
-    rm -rf $FORKED_COLLATOR_CHAIN_FOLDER
-    mkdir $FORKED_COLLATOR_CHAIN_FOLDER
+    rm -rf ${FORKED_COLLATOR_CHAIN_FOLDER}
+    mkdir ${FORKED_COLLATOR_CHAIN_FOLDER}
     
     ${binary_path} \
     key insert \
@@ -168,9 +168,78 @@ execute_another_collator_node() {
 	fi
 }
 
+execute_evm_node() {
+    local chain_name=$1
+	local wasm_folder_path=$2
+	local log_file=$3/$chain_name.evm
+
+    # Get the parachain launch's config
+    local parachain_id=`get_parachain_id $chain_name`
+    if [ $? -ne 0 ]; then
+        echo_error "Cannot get the parachain id"
+        exit 1
+    fi
+    local parachain_config_file=`get_parachain_launch_chain_spec $chain_name`
+    if [ $? -ne 0 ]; then
+        echo_error "Cannot get the parachain id"
+        exit 1
+    fi
+    local parachain_config="${PARACHAIN_LAUNCH_FOLDER}/yoyo/${parachain_config_file}"
+    local relaychain_config="${PARACHAIN_LAUNCH_FOLDER}/yoyo/rococo-local.json"
+
+    # Get the peer_id
+    cd ${CI_FOLDER}
+    local peer_id=`python3 tools/get_peer_id.py --read docker --type peaq | grep Parachain | grep -oE 'Parachain Peer id: [^ ]+' | awk '{print $NF}'`
+
+    if [[ $peer_id == "None" ]]; then
+        echo_highlight "Cannot find the $peer_id"
+        exit 1
+    fi
+    local parachain_bootnode="/ip4/127.0.0.1/tcp/40336/p2p/${peer_id}"
+
+    # Start to setup
+    cd ${PARACHAIN_LAUNCH_FOLDER}
+
+    rm -rf ${EVM_NODE_CHAIN_FOLDER}
+    mkdir ${EVM_NODE_CHAIN_FOLDER}
+    
+    ${PEAQ_NODE_BINARY_PATH} \
+    --parachain-id ${parachain_id} \
+    --chain ${parachain_config} \
+    --port 50334 \
+    --rpc-port 20044 \
+    --base-path ${EVM_NODE_CHAIN_FOLDER} \
+    --unsafe-rpc-external \
+    --rpc-cors=all \
+    --rpc-methods=Unsafe \
+    --ethapi=debug,trace,txpool
+    --execution wasm \
+     --wasm-runtime-overrides ${wasm_folder_path} \
+    --bootnodes $parachain_bootnode \
+    -- \
+    --execution wasm \
+    --chain $relaychain_config \
+    --port 50345 \
+    --rpc-port 20055 \
+    --unsafe-rpc-external \
+    --rpc-cors=all 2>&1 | tee ${log_file} &
+
+    echo_highlight "Wait for the evm node run"
+	sleep 20
+	echo_highlight "Finish the evm node start"
+}
+
+kill_peaq_node() {
+	pid=`pgrep -f ${WORK_DIRECTORY}`
+	kill -9 ${pid}
+}
 
 reset_forked_collator_parachain_launch() {
-    pid=`pgrep -f ${WORK_DIRECTORY}`
-    kill -9 ${pid}
+	kill_peaq_node
     rm -rf ${FORKED_COLLATOR_CHAIN_FOLDER}
+}
+
+reset_evm_node() {
+	kill_peaq_node
+	rm -rf ${EVM_NODE_CHAIN_FOLDER}
 }
