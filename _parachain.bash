@@ -212,9 +212,9 @@ execute_evm_node() {
     --unsafe-rpc-external \
     --rpc-cors=all \
     --rpc-methods=Unsafe \
-    --ethapi=debug,trace,txpool
+    --ethapi=debug,trace,txpool \
     --execution wasm \
-     --wasm-runtime-overrides ${wasm_folder_path} \
+    --wasm-runtime-overrides ${wasm_folder_path} \
     --bootnodes $parachain_bootnode \
     -- \
     --execution wasm \

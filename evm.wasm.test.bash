@@ -54,17 +54,17 @@ START_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
 mkdir -p ${OUT_FOLDER_PATH}
 
-echo_info "Start evm.wasm.bash"
+# echo_info "Start evm.wasm.bash"
 
-echo_highlight "Start build for the node ${COMMIT}"
-cargo_build | tee ${OUT_FOLDER_PATH}/build.log
-echo_highlight "Finished build ${COMMIT}"
+# echo_highlight "Start build for the node ${COMMIT}"
+# cargo_build | tee ${OUT_FOLDER_PATH}/build.log
+# echo_highlight "Finished build ${COMMIT}"
 
 # pack image
-r_pack_peaq_docker_img "latest"
-r_pack_peaq_docker_img "${COMMIT}"
+# r_pack_peaq_docker_img "latest"
+# r_pack_peaq_docker_img "${COMMIT}"
 
-echo_highlight "Finished pack docker image, ${COMMIT} + latest"
+# echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 # Rebuild the evm related features
 cargo build --release --features "std aura evm-tracing" | tee ${OUT_FOLDER_PATH}/build.log
@@ -91,6 +91,12 @@ if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 		echo_report ${REPORT_PATH} "evm test test fail: peaq-dev test fail"
 		ERROR_HAPPENED=1
 	fi
+	sleep 30
+	check_evm_node_run ${OUT_FOLDER_PATH}
+	if [ $? -ne 0 ]; then
+		echo_report ${REPORT_PATH} "evm fails: peaq-dev test fail"
+		ERROR_HAPPENED=1
+	fi
 	reset_evm_node
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
@@ -101,6 +107,12 @@ if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
 		echo_report ${REPORT_PATH} "evm wasm test fail: krest test fail"
 		ERROR_HAPPENED=1
 	fi
+	sleep 30
+	check_evm_node_run ${OUT_FOLDER_PATH}
+	if [ $? -ne 0 ]; then
+		echo_report ${REPORT_PATH} "evm fails: krest test fail"
+		ERROR_HAPPENED=1
+	fi
 	reset_evm_node
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
@@ -109,6 +121,12 @@ if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
 	execute_pytest "peaq" "test_evm_rpc_identity_contract" ${OUT_FOLDER_PATH}
 	if [ $? -ne 0 ]; then
 		echo_report ${REPORT_PATH} "evm wasm test fail: peaq test fail"
+		ERROR_HAPPENED=1
+	fi
+	sleep 30
+	check_evm_node_run ${OUT_FOLDER_PATH}
+	if [ $? -ne 0 ]; then
+		echo_report ${REPORT_PATH} "evm fails: peaq test fail"
 		ERROR_HAPPENED=1
 	fi
 	reset_evm_node

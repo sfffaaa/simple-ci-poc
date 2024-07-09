@@ -66,3 +66,41 @@ execute_runtime_upgrade_only() {
         exit 1
     fi
 }
+
+check_evm_node_run() {
+	local log_file="$1/evm.log"
+    local block_height=`curl -s http://127.0.0.1:20044 -H "Content-Type:application/json;charset=utf-8" -d \
+        '{
+            "jsonrpc":"2.0",
+            "method":"eth_getBlockByNumber",
+            "params":["latest", false],
+            "id":1
+         }' | jq '.result.number'`
+    local block_height_hex="${block_height//\"/}"
+
+    for (( i=0; i<=30; i++))
+    do
+        current_dec=$((block_height_hex - i))
+        current_hex=$(printf "0x%X" "$current_dec")
+        local out=`curl -s http://127.0.0.1:20044 -H "Content-Type:application/json;charset=utf-8" -d \
+            '{
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "debug_traceBlockByNumber",
+                "params": ["'"${current_hex}"'", {"tracer": "callTracer"}]
+            }' | jq '.result[0].type != null'`
+        if [[ $out == "true" ]]; then
+            curl -s http://127.0.0.1:20044 -H "Content-Type:application/json;charset=utf-8" -d \
+            	'{
+            	    "jsonrpc": "2.0",
+            	    "id": 1,
+            	    "method": "debug_traceBlockByNumber",
+            	    "params": ["'"${current_hex}"'", {"tracer": "callTracer"}]
+            	}' | jq '.result' | tee -a ${log_file}
+            echo_highlight "Found the debug call successfully"
+            return 0
+        fi
+    done
+    echo_highlight "Cannot find the debug call"
+    return 1
+}
