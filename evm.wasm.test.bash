@@ -44,15 +44,15 @@ if [[ -z "$CHAIN" ]]; then
     exit 1
 fi
 
-cd ${PEAQ_NETWORK_NODE_FOLDER}
-COMMIT=`git log -n 1 --format=%H | cut -c 1-6`
+cd "${PEAQ_NETWORK_NODE_FOLDER}" || { echo_highlight "Error... "; exit 1; }
+COMMIT=$(git log -n 1 --format=%H | cut -c 1-6)
 OUT_FOLDER_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/evm.wasm
 SUMMARY_PATH=${RESULT_PATH}/${DATETIME}.${COMMIT}/summary
 REPORT_PATH=${OUT_FOLDER_PATH}/report.log
 ERROR_HAPPENED=0
 START_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-mkdir -p ${OUT_FOLDER_PATH}
+mkdir -p "${OUT_FOLDER_PATH}"
 
 # echo_info "Start evm.wasm.bash"
 
@@ -67,77 +67,75 @@ mkdir -p ${OUT_FOLDER_PATH}
 # echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 # Rebuild the evm related features
-cargo build --release --features "std aura evm-tracing" | tee ${OUT_FOLDER_PATH}/build.log
+cargo build --release --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
 rm -rf evm
 mkdir -p evm
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	mkdir -p ${PEAQ_DEV_WASM_DST_FOLDER_PATH}
-	cp ${PEAQ_DEV_ORI_EVM_WASM_PATH} ${PEAQ_DEV_WASM_DST_FOLDER_PATH}
+	mkdir -p "${PEAQ_DEV_WASM_DST_FOLDER_PATH}"
+	cp "${PEAQ_DEV_ORI_EVM_WASM_PATH}" "${PEAQ_DEV_WASM_DST_FOLDER_PATH}"
 elif [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	mkdir -p ${KREST_WASM_DST_FOLDER_PATH}
-	cp ${KREST_ORI_EVM_WASM_PATH} ${KREST_WASM_DST_FOLDER_PATH}
+	mkdir -p "${KREST_WASM_DST_FOLDER_PATH}"
+	cp "${KREST_ORI_EVM_WASM_PATH}" "${KREST_WASM_DST_FOLDER_PATH}"
 elif [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	mkdir -p ${PEAQ_WASM_DST_FOLDER_PATH}
-	cp ${PEAQ_ORI_EVM_WASM_PATH}  ${PEAQ_WASM_DST_FOLDER_PATH}
+	mkdir -p "${PEAQ_WASM_DST_FOLDER_PATH}"
+	cp "${PEAQ_ORI_EVM_WASM_PATH}" "${PEAQ_WASM_DST_FOLDER_PATH}"
 fi
 echo_highlight "Finished copy evm wasm image, ${COMMIT} + latest"
 
 
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq-dev" ${OUT_FOLDER_PATH}
-	execute_evm_node "peaq-dev" ${PEAQ_DEV_WASM_DST_FOLDER_PATH} ${OUT_FOLDER_PATH}
-	execute_pytest "peaq-dev" "test_evm_rpc_identity_contract" ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm test test fail: peaq-dev test fail"
+	execute_parachain_launch "peaq-dev" "${OUT_FOLDER_PATH}"
+	execute_evm_node "peaq-dev" "${PEAQ_DEV_WASM_DST_FOLDER_PATH}" "${OUT_FOLDER_PATH}"
+	if ! execute_pytest "peaq-dev" "test_evm_rpc_identity_contract" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm test test fail: peaq-dev test fail"
 		ERROR_HAPPENED=1
 	fi
 	sleep 30
-	check_evm_node_run ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm fails: peaq-dev test fail"
+	
+	if ! check_evm_node_run "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm fails: peaq-dev test fail"
 		ERROR_HAPPENED=1
 	fi
 	reset_evm_node
 fi
 if [[ $CHAIN == "krest" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "krest" ${OUT_FOLDER_PATH}
-	execute_evm_node "krest" ${KREST_WASM_DST_FOLDER_PATH} ${OUT_FOLDER_PATH}
-	execute_pytest "krest" "test_evm_rpc_identity_contract" ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm wasm test fail: krest test fail"
+	execute_parachain_launch "krest" "${OUT_FOLDER_PATH}"
+	execute_evm_node "krest" "${KREST_WASM_DST_FOLDER_PATH}" "${OUT_FOLDER_PATH}"
+	if ! execute_pytest "krest" "test_evm_rpc_identity_contract" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm wasm test fail: krest test fail"
 		ERROR_HAPPENED=1
 	fi
 	sleep 30
-	check_evm_node_run ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm fails: krest test fail"
+	
+	if ! check_evm_node_run "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm fails: krest test fail"
 		ERROR_HAPPENED=1
 	fi
 	reset_evm_node
 fi
 if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
-	execute_parachain_launch "peaq" ${OUT_FOLDER_PATH}
-	execute_evm_node "peaq" ${PEAQ_WASM_DST_FOLDER_PATH} ${OUT_FOLDER_PATH}
-	execute_pytest "peaq" "test_evm_rpc_identity_contract" ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm wasm test fail: peaq test fail"
+	execute_parachain_launch "peaq" "${OUT_FOLDER_PATH}"
+	execute_evm_node "peaq" "${PEAQ_WASM_DST_FOLDER_PATH}" "${OUT_FOLDER_PATH}"
+	
+	if ! execute_pytest "peaq" "test_evm_rpc_identity_contract" "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm wasm test fail: peaq test fail"
 		ERROR_HAPPENED=1
 	fi
 	sleep 30
-	check_evm_node_run ${OUT_FOLDER_PATH}
-	if [ $? -ne 0 ]; then
-		echo_report ${REPORT_PATH} "evm fails: peaq test fail"
+	
+	if ! check_evm_node_run "${OUT_FOLDER_PATH}"; then
+		echo_report "${REPORT_PATH}" "evm fails: peaq test fail"
 		ERROR_HAPPENED=1
 	fi
 	reset_evm_node
 fi
 
 if [ ${ERROR_HAPPENED} -ne 1 ]; then
-	echo_report ${REPORT_PATH} "evm wasm finish: ${CHAIN}: success!!"
+	echo_report "${REPORT_PATH}" "evm wasm finish: ${CHAIN}: success!!"
 fi
 
 FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 
-echo_report ${REPORT_PATH} "Finish evm wasm test: From ${START_DATETIME} to ${FINISH_DATETIME}"
-cat ${REPORT_PATH} >> ${SUMMARY_PATH}
+echo_report "${REPORT_PATH}" "Finish evm wasm test: From ${START_DATETIME} to ${FINISH_DATETIME}"
+cat "${REPORT_PATH}" >> "${SUMMARY_PATH}"
 echo_highlight "Please go to ${SUMMARY_PATH} or ${REPORT_PATH} check the report"
