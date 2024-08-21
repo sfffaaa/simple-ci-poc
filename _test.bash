@@ -17,7 +17,7 @@ execute_pytest() {
         elif [[ $test_module == "xcm" ]]; then
             pytest -m "${test_module}" | tee "${log_file}"
         elif [[ $test_module == *".py" ]]; then
-            pytest tests/"${test_module}" | tee "${log_file}"
+            pytest -s tests/"${test_module}" | tee "${log_file}"
         else
             pytest -k "${test_module}" | tee "${log_file}"
         fi  
@@ -74,7 +74,7 @@ check_evm_node_run() {
          }' | jq '.result.number')
     local block_height_hex="${block_height//\"/}"
 
-    for (( i=0; i<=30; i++))
+    for (( i=0; i<=1000; i++))
     do
         current_dec=$((block_height_hex - i))
         current_hex=$(printf "0x%X" "$current_dec")

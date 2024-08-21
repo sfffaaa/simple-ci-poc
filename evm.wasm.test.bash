@@ -67,7 +67,7 @@ r_pack_peaq_docker_img "${COMMIT}"
 echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 # Rebuild the evm related features
-cargo build --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
+cargo build --release --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
 rm -rf evm
 mkdir -p evm
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then

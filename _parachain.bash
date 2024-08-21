@@ -12,12 +12,12 @@ r_parachain_generate() {
 
 r_parachain_down() {
     cd "${WORK_DIRECTORY}"/parachain-launch/yoyo || { echo_error "Cannot find the parachain-launch folder"; exit 1; }
-    docker compose down -v
+    docker compose -f "${WORK_DIRECTORY}"/parachain-launch/yoyo/docker-compose.yml down -v
 }
 
 r_parachain_up() {
     cd "${WORK_DIRECTORY}"/parachain-launch/yoyo || { echo_error "Cannot find the parachain-launch folder"; exit 1; }
-    docker compose up --build -d
+    docker compose -f "${WORK_DIRECTORY}"/parachain-launch/yoyo/docker-compose.yml up --build -d
 }
 
 
@@ -130,6 +130,26 @@ execute_another_collator_node() {
     --suri "$SURI" \
     --key-type aura
 
+	echo "    ${binary_path} \
+    --parachain-id "${parachain_id}" \
+    --collator \
+    --chain "${parachain_config}" \
+    --port 50334 \
+    --rpc-port 20044 \
+    --base-path "${FORKED_COLLATOR_CHAIN_FOLDER}" \
+    --unsafe-rpc-external \
+    --rpc-cors=all \
+    --rpc-methods=Unsafe \
+    --execution wasm \
+    --bootnodes "$parachain_bootnode" \
+    -- \
+    --execution wasm \
+    --chain "$relaychain_config" \
+    --port 50345 \
+    --rpc-port 20055 \
+    --unsafe-rpc-external \
+    --rpc-cors=all"
+
     ${binary_path} \
     --parachain-id "${parachain_id}" \
     --collator \
@@ -153,10 +173,10 @@ execute_another_collator_node() {
     echo_highlight "Wait for the collator run"
     sleep 20
     echo_highlight "Wait for the collator start to generate block"
-    for _i in {0..64}
+    for _i in {0..128}
     do
         sleep 12
-        if ! grep "Compressed" "${log_file}"; then
+        if grep "Compressed" "${log_file}"; then
             echo_highlight "Collator successfully generate a block"
             break
         fi
@@ -231,11 +251,10 @@ execute_evm_node() {
 }
 
 kill_peaq_node() {
-    pid=$(pgrep -f "${WORK_DIRECTORY}")
-    kill -9 "${pid}"
+	pkill peaq-node
 }
 
-reset_forked_collator_parachain_launch() {
+reset_forked_collator() {
     kill_peaq_node
     rm -rf "${FORKED_COLLATOR_CHAIN_FOLDER}"
 }
