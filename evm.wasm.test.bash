@@ -117,6 +117,8 @@ if [[ $CHAIN == "peaq" || $CHAIN == "all" ]]; then
 	execute_parachain_launch "peaq" "${OUT_FOLDER_PATH}"
 	execute_evm_node "peaq" "${PEAQ_WASM_DST_FOLDER_PATH}" "${OUT_FOLDER_PATH}"
 	
+	echo_report "${REPORT_PATH}" "Sleep 10min"
+	sleep 600
 	if ! execute_pytest "peaq" "test_evm_rpc_identity_contract" "${OUT_FOLDER_PATH}"; then
 		echo_report "${REPORT_PATH}" "evm wasm test fail: peaq test fail"
 		ERROR_HAPPENED=1

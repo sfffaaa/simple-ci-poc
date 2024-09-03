@@ -223,7 +223,28 @@ execute_evm_node() {
 
     rm -rf "${EVM_NODE_CHAIN_FOLDER}"
     mkdir "${EVM_NODE_CHAIN_FOLDER}"
-    
+  
+    echo "${PEAQ_NODE_BINARY_PATH}" \
+    --parachain-id "${parachain_id}" \
+    --chain "${parachain_config}" \
+    --port 50334 \
+    --rpc-port 20044 \
+    --base-path "${EVM_NODE_CHAIN_FOLDER}" \
+    --unsafe-rpc-external \
+    --rpc-cors=all \
+    --rpc-methods=Unsafe \
+    --ethapi=debug,trace,txpool \
+    --execution wasm \
+    --wasm-runtime-overrides "${wasm_folder_path}" \
+    --bootnodes "$parachain_bootnode" \
+    -- \
+    --execution wasm \
+    --chain "$relaychain_config" \
+    --port 50345 \
+    --rpc-port 20055 \
+    --unsafe-rpc-external \
+    --rpc-cors=all
+
     ${PEAQ_NODE_BINARY_PATH} \
     --parachain-id "${parachain_id}" \
     --chain "${parachain_config}" \
