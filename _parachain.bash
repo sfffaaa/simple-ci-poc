@@ -11,8 +11,10 @@ r_parachain_generate() {
 }
 
 r_parachain_down() {
-    cd "${WORK_DIRECTORY}"/parachain-launch/yoyo || { echo_error "Cannot find the parachain-launch folder"; exit 1; }
-    docker compose -f "${WORK_DIRECTORY}"/parachain-launch/yoyo/docker-compose.yml down -v
+    if [ -d "${WORK_DIRECTORY}"/parachain-launch/yoyo ]; then
+        cd "${WORK_DIRECTORY}"/parachain-launch/yoyo || { echo_error "Cannot find the parachain-launch folder"; exit 1; }
+        docker compose -f "${WORK_DIRECTORY}"/parachain-launch/yoyo/docker-compose.yml down -v
+    fi
 }
 
 r_parachain_up() {
