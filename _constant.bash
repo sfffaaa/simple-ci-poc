@@ -1,6 +1,7 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 
+GLOBAL_VENV=${GLOBAL_VENV:-"false"}
 WORK_DIRECTORY=${WORK_DIRECTORY:-"/home/jaypan/Work/peaq/CI"}
 PEAQ_NETWORK_NODE_BRANCH=${PEAQ_NETWORK_NODE_BRANCH:-"dev"}
 PEAQ_BC_TEST_BRANCH=${PEAQ_BC_TEST_BRANCH:-"main"}

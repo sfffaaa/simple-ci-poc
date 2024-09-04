@@ -11,7 +11,9 @@ execute_pytest() {
     echo_highlight "Start test for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || { echo_error "Cannot find peaq-bc-test"; exit 1; }
-        source "${WORK_DIRECTORY}"/venv/bin/activate
+        if [ "${GLOBAL_VENV}" == "false" ]; then
+            source "${WORK_DIRECTORY}"/venv/bin/activate
+        fi
         if [[ $test_module == "all" ]]; then
             pytest | tee "${log_file}"
         elif [[ $test_module == "xcm" ]]; then
@@ -32,7 +34,9 @@ execute_runtime_upgrade_pytest() {
     echo_highlight "Start test for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || exit
-        source "${WORK_DIRECTORY}"/venv/bin/activate
+        if [ "${GLOBAL_VENV}" == "false" ]; then
+            source "${WORK_DIRECTORY}"/venv/bin/activate
+        fi
         RUNTIME_UPGRADE_PATH=${runtime_path} python3 tools/runtime_upgrade.py
 
         if [[ $test_module == "all" ]]; then
@@ -53,7 +57,9 @@ execute_runtime_upgrade_only() {
     echo_highlight "Start runtime upgrade for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || exit
-        source "${WORK_DIRECTORY}"/venv/bin/activate
+        if [ "${GLOBAL_VENV}" == "false" ]; then
+            source "${WORK_DIRECTORY}"/venv/bin/activate
+        fi
         
         if ! RUNTIME_UPGRADE_PATH=${runtime_path} python3 tools/runtime_upgrade.py | tee "${log_file}"; then
             echo_error "Error happens...."
