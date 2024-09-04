@@ -1,13 +1,13 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 
-WORK_DIRECTORY="/home/jaypan/Work/peaq/CI"
-PEAQ_NETWORK_NODE_BRANCH="dev"
-PEAQ_BC_TEST_BRANCH="main"
-PARACHAIN_LAUNCH_BRANCH="feat/simple-ci"
-RESULT_PATH="/home/jaypan/Work/peaq/CI/results"
+WORK_DIRECTORY=${WORK_DIRECTORY:-"/home/jaypan/Work/peaq/CI"}
+PEAQ_NETWORK_NODE_BRANCH=${PEAQ_NETWORK_NODE_BRANCH:-"dev"}
+PEAQ_BC_TEST_BRANCH=${PEAQ_BC_TEST_BRANCH:-"main"}
+PARACHAIN_LAUNCH_BRANCH=${PARACHAIN_LAUNCH_BRANCH:-"feat/simple-ci"}
+RESULT_PATH=${PARACHAIN_LAUNCH_BRANCH:-"/home/jaypan/Work/peaq/CI/results"}
 
-FORKED_BINARY_FOLDER="/home/jaypan/Work/peaq/CI/binary"
+FORKED_BINARY_FOLDER=${FORKED_BINARY_FOLDER:-"/home/jaypan/Work/peaq/CI/binary"}
 
 
 NOW_DATETIME=$(date '+%Y-%m-%d-%H-%M')
