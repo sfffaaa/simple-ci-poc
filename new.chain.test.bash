@@ -113,3 +113,7 @@ FINISH_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 echo_report "${REPORT_PATH}" "Finish new chain test: From ${START_DATETIME} to ${FINISH_DATETIME}"
 cat "${REPORT_PATH}" >> "${SUMMARY_PATH}"
 echo_highlight "Please go to ${SUMMARY_PATH} or ${REPORT_PATH} check the report"
+
+if [ ${ERROR_HAPPENED} -eq 1 ]; then
+	exit 1
+fi
