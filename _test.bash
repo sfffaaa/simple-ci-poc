@@ -7,7 +7,8 @@ source _utils.bash
 execute_pytest() {
     local chain_name=$1
     local test_module=$2
-    local log_file=$3/${chain_name}
+    local log_file
+    log_file=$(realpath "$3/${chain_name}")
     echo_highlight "Start test for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || { echo_error "Cannot find peaq-bc-test"; exit 1; }
@@ -30,7 +31,8 @@ execute_runtime_upgrade_pytest() {
     local chain_name=$1
     local test_module=$2
     local runtime_path=$3
-    local log_file=$4/${chain_name}
+    local log_file
+    log_file=$(realpath "$4/${chain_name}")
     echo_highlight "Start test for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || exit
@@ -53,7 +55,8 @@ execute_runtime_upgrade_pytest() {
 execute_runtime_upgrade_only() {
     local chain_name=$1
     local runtime_path=$2
-    local log_file=$3/${chain_name}
+    local log_file
+    log_file=$(realpath "$3/${chain_name}")
     echo_highlight "Start runtime upgrade for ${chain_name}" | tee "${log_file}"
     (   
         cd "${WORK_DIRECTORY}"/peaq-bc-test || exit
