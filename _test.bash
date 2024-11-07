@@ -39,6 +39,8 @@ execute_runtime_upgrade_pytest() {
         if [ "${GLOBAL_VENV}" == "false" ]; then
             source "${WORK_DIRECTORY}"/venv/bin/activate
         fi
+
+        subwasm info ${runtime_path}
         RUNTIME_UPGRADE_PATH=${runtime_path} python3 tools/runtime_upgrade.py
 
         if [[ $test_module == "all" ]]; then

@@ -70,20 +70,20 @@ mkdir -p "${OUT_FOLDER_PATH}"
 echo_info "Start fork.chain.test.bash"
 # start build
 echo_highlight "Start build for the node ${COMMIT}"
-cargo build --release | tee "${OUT_FOLDER_PATH}/build.log"
+cargo build --release --features on-chain-release-build | tee "${OUT_FOLDER_PATH}/build.log"
 echo_highlight "Finished build ${COMMIT}"
 
 
 # we don't need to pack image
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then
 	if ! forked_config_file=$(check_and_get_forked_config "${PEAQ_DEV_RPC_ENDPOINT}" "peaq-dev"); then
-		echo_report "${REPORT_PATH}" "forked test peaq fail: peaq-dev $forked_config_file"
+		echo_report "${REPORT_PATH}" "forked test peaq fail: config peaq-dev $forked_config_file"
 		ERROR_HAPPENED=1
 		exit 1
 	fi
 	
 	if ! fork_folder=$(check_and_get_forked_folder "${PEAQ_DEV_RPC_ENDPOINT}" "peaq-dev"); then
-		echo_report "${REPORT_PATH}" "forked test peaq fail: peaq-dev $fork_folder"
+		echo_report "${REPORT_PATH}" "forked test peaq fail: fork forder peaq-dev $fork_folder"
 		ERROR_HAPPENED=1
 		exit 1
 	fi

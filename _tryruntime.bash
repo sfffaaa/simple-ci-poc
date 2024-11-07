@@ -13,5 +13,5 @@ try_runtime_test() {
     cd "${PEAQ_NETWORK_NODE_FOLDER}" || exit
     try-runtime \
     --runtime "${runtime_module_path}" \
-    on-runtime-upgrade live --uri "${wss_endpoint}" 2>&1 | tee "${log_file}"
+    on-runtime-upgrade --blocktime 6 live --uri "${wss_endpoint}" 2>&1 | tee "${log_file}"
 }

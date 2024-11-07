@@ -13,15 +13,15 @@ FORKED_BINARY_FOLDER=${FORKED_BINARY_FOLDER:-"/home/jaypan/Work/peaq/CI/binary"}
 
 NOW_DATETIME=$(date '+%Y-%m-%d-%H-%M')
 DATETIME=${SET_DATETIME:-$NOW_DATETIME}
-SLEEP_TIME=120
+SLEEP_TIME=300
 PEAQ_NETWORK_NODE_FOLDER=${WORK_DIRECTORY}/peaq-network-node
 PEAQ_BC_TEST_FOLDER=${WORK_DIRECTORY}/peaq-bc-test
 PARACHAIN_LAUNCH_FOLDER=${WORK_DIRECTORY}/parachain-launch
 CI_FOLDER=${WORK_DIRECTORY}/simple-ci-poc
-PEAQ_DEV_RPC_ENDPOINT="https://rpcpc1-qa.agung.peaq.network"
+PEAQ_DEV_RPC_ENDPOINT="https://wss-async.agung.peaq.network"
 KREST_RPC_ENDPOINT="https://erpc-krest.peaq.network"
 PEAQ_RPC_ENDPOINT="https://erpc-mpfn1.peaq.network"
-PEAQ_DEV_WSS_ENDPOINT="wss://rpcpc1-qa.agung.peaq.network"
+PEAQ_DEV_WSS_ENDPOINT="wss://wss-async.agung.peaq.network"
 KREST_WSS_ENDPOINT="wss://erpc-krest.peaq.network"
 PEAQ_WSS_ENDPOINT="wss://erpc-mpfn1.peaq.network"
 

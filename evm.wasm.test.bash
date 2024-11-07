@@ -57,7 +57,7 @@ mkdir -p "${OUT_FOLDER_PATH}"
 echo_info "Start evm.wasm.bash"
 
 echo_highlight "Start build for the node ${COMMIT}"
-cargo build --release | tee ${OUT_FOLDER_PATH}/build.log
+cargo build --release --features on-chain-release-build | tee ${OUT_FOLDER_PATH}/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 # pack image
@@ -67,7 +67,7 @@ r_pack_peaq_docker_img "${COMMIT}"
 echo_highlight "Finished pack docker image, ${COMMIT} + latest"
 
 # Rebuild the evm related features
-cargo build --release --features "std aura evm-tracing" | tee -a "${OUT_FOLDER_PATH}/build.log"
+cargo build --release --features "std aura evm-tracing on-chain-release-build" | tee -a "${OUT_FOLDER_PATH}/build.log"
 rm -rf evm
 mkdir -p evm
 if [[ $CHAIN == "peaq-dev" || $CHAIN == "all" ]]; then

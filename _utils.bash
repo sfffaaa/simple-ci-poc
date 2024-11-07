@@ -23,9 +23,9 @@ echo_report() {
 cargo_build() {
 	local argument=$1
     if [[ $argument == "" ]]; then
-        cargo build --release
+        cargo build --release --features on-chain-release-build
     else
-        cargo build --release "${argument}"
+        cargo build --release --features on-chain-release-build "${argument}"
     fi  
 }
 
@@ -50,13 +50,13 @@ check_and_get_forked_folder() {
 
 	local folder=${FORKED_BINARY_FOLDER}/$version
 	if ! [ -d "$folder" ]; then
-		echo_highlight "$folder: not exist, force exit"
+		echo_highlight "$folder: folder not exist, force exit"
 		exit 1
 	fi
 
 	local binary=$folder/peaq-node
 	if ! [ -f "$binary" ]; then
-		echo_highlight "$binary: not exist, force exit"
+		echo_highlight "$binary: binary not exist, force exit"
 		exit 1
 	fi
 	echo "$folder"

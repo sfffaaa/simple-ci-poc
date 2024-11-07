@@ -62,7 +62,7 @@ echo_info "Start fork.collator.test.bash"
 
 # start build
 echo_highlight "Start build for the node ${COMMIT}"
-cargo build --release | tee "${OUT_FOLDER_PATH}"/build.log
+cargo build --release --features on-chain-release-build | tee "${OUT_FOLDER_PATH}"/build.log
 echo_highlight "Finished build ${COMMIT}"
 
 
