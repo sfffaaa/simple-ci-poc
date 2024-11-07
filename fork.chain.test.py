@@ -28,6 +28,7 @@ subprocess.Popen = print_command(subprocess.Popen)
 
 TARGET_CHAIN = 'peaq-dev'
 OVERRIDE_RUNTIME_MODULE = ''
+PYTEST_ARGUMENTS = ""
 
 
 def show_report(wasm_info, runtime_module_path, pytest_result, pytest_test_arguments):
@@ -69,12 +70,11 @@ if __name__ == '__main__':
 
     wasm_info = get_wasm_info(runtime_module_path)
     venv_path = env_dict['VENV_PATH']
-    pytest_test_arguments = "-s tests/pallet_did_test.py -k test_did_remove"
 
-    pytest_result = pytest_wi_runtime_module(TARGET_CHAIN, env_dict, venv_path, runtime_module_path, pytest_test_arguments)
+    pytest_result = pytest_wi_runtime_module(TARGET_CHAIN, env_dict, venv_path, runtime_module_path, PYTEST_ARGUMENTS)
 
     show_generate_info(env_dict, show_pytest=True)
-    show_report(wasm_info, runtime_module_path, pytest_result, pytest_test_arguments)
+    show_report(wasm_info, runtime_module_path, pytest_result, PYTEST_ARGUMENTS)
     if pytest_result["success"]:
         print(f"============ {Fore.GREEN}Fork test successes {Style.RESET_ALL} ============")
     else:

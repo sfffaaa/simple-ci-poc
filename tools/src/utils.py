@@ -203,18 +203,17 @@ def build_node(env, with_evm):
 def pack_peaq_docker_image(env):
     docker_tag = "peaq_para_node:latest"
     command = f"docker build -f scripts/Dockerfile.parachain-launch -t {docker_tag} ."
-    result = subprocess.run(
+    with subprocess.Popen(
         command,
         shell=True,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
         cwd=os.path.join(env['WORK_DIRECTORY'], 'peaq-network-node'),
-        text=True)
-
-    if result.returncode:
-        print(f'Error: on {os.getcwd()} build failed')
-        raise IOError
-
-    for err_str in ['not found', 'error', 'undefined']:
-        if any(err_str in line.lower() for line in result.stdout):
-            print(f'Error: on {result.stdout} build failed')
+        text=True
+    ) as process:
+        for line in process.stdout:
+            print(line, end="")
+        process.wait()
+        if process.returncode:
+            print(f'Error: on {env["WORK_DIRECTORY"]} build failed')
             raise IOError

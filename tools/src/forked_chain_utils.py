@@ -69,24 +69,24 @@ def execute_forked_test_parachain_launch(chain_name, forked_config_file, forked_
 
 
 def remove_parachain_composer_folder(env):
-    result = subprocess.run(
+    subprocess.run(
         f"rm -rf yoyo",
         shell=True,
         capture_output=True,
         cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch'),
         text=True
     )
-    if result.returncode:
-        print(f'Error: {result.stderr}')
-        raise IOError
 
 
 def parachain_down(env):
+    if not os.path.isdir(os.path.join(env['WORK_DIRECTORY'], 'parachain-launch', 'yoyo')):
+        return
     with subprocess.Popen(
-        f"docker-compose down -v",
+        f"docker compose down -v",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        executable="/bin/bash",
         text=True,
         cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch', 'yoyo'),
     ) as process:
@@ -107,10 +107,11 @@ def parachain_down(env):
 
 def parachain_up(env):
     with subprocess.Popen(
-        f"docker-compose up --build -d",
+        f"docker compose up --build -d",
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        executable="/bin/bash",
         text=True,
         cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch', 'yoyo'),
     ) as process:
@@ -129,13 +130,14 @@ def parachain_up(env):
 
 def parachain_generate(env, chain_name):
     config_file = f"ci.config/config.parachain.{chain_name}.yml"
-    command = f'./bin/parachain-launch generate --config="${config_file}" --output=yoyo'
+    command = f'./bin/parachain-launch generate --config="{config_file}" --output=yoyo'
 
     with subprocess.Popen(
         command,
         shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
+        executable="/bin/bash",
         cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch'),
         text=True
     ) as process:
