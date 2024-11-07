@@ -66,3 +66,93 @@ def execute_forked_test_parachain_launch(chain_name, forked_config_file, forked_
             if any(err_str in line.lower() for line in process.stdout):
                 print(f'Error: on {PARACHAIN_LAUNCH_FOLDER} build failed')
                 raise IOError
+
+
+def remove_parachain_composer_folder(env):
+    result = subprocess.run(
+        f"rm -rf yoyo",
+        shell=True,
+        capture_output=True,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch'),
+        text=True
+    )
+    if result.returncode:
+        print(f'Error: {result.stderr}')
+        raise IOError
+
+
+def parachain_down(env):
+    with subprocess.Popen(
+        f"docker-compose down -v",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch', 'yoyo'),
+    ) as process:
+        for line in process.stdout:
+            print(line, end="")
+        process.wait()
+        if process.returncode:
+            print(f'Error: {process.stdout}')
+            print(f'But it is fine, we will continue')
+
+        for err_str in ['not found', 'error', 'undefined']:
+            if any(err_str in line.lower() for line in process.stdout):
+                print(f'Error: on {PARACHAIN_LAUNCH_FOLDER} build failed')
+                raise IOError
+
+    remove_parachain_composer_folder(env)
+
+
+def parachain_up(env):
+    with subprocess.Popen(
+        f"docker-compose up --build -d",
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch', 'yoyo'),
+    ) as process:
+        for line in process.stdout:
+            print(line, end="")
+        process.wait()
+        if process.returncode:
+            print(f'Error: {process.stdout}')
+            raise IOError
+
+        for err_str in ['not found', 'error', 'undefined']:
+            if any(err_str in line.lower() for line in process.stdout):
+                print(f'Error: on {PARACHAIN_LAUNCH_FOLDER} build failed')
+                raise IOError
+
+
+def parachain_generate(env, chain_name):
+    config_file = f"ci.config/config.parachain.{chain_name}.yml"
+    command = f'./bin/parachain-launch generate --config="${config_file}" --output=yoyo'
+
+    with subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'parachain-launch'),
+        text=True
+    ) as process:
+        for line in process.stdout:
+            print(line, end="")
+        process.wait()
+        if process.returncode:
+            print(f'Error: on {PARACHAIN_LAUNCH_FOLDER} build failed')
+            raise IOError
+
+        for err_str in ['not found', 'error', 'undefined']:
+            if any(err_str in line.lower() for line in process.stdout):
+                print(f'Error: on {PARACHAIN_LAUNCH_FOLDER} build failed')
+                raise IOError
+
+
+def execute_new_test_parachain_launch(env, chain_name):
+    parachain_down(env)
+    parachain_generate(env, chain_name)
+    parachain_up(env)

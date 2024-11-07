@@ -42,23 +42,51 @@ def get_git_branch(path):
     return result.stdout.strip()
 
 
+def get_git_commit(path):
+    import sys
+    import importlib
+    if 'subprocess' in sys.modules:
+        temp_subprocess = sys.modules['subprocess']
+        del sys.modules['subprocess']
+
+    original_subprocess = importlib.import_module('subprocess')
+
+    result = original_subprocess.run(
+        'git log -n 1 --format=%H | cut -c 1-7',
+        shell=True,
+        cwd=path,
+        capture_output=True,
+        text=True)
+
+    sys.modules['subprocess'] = temp_subprocess
+    if result.returncode:
+        print(f'Error: on {path} {result.stderr}')
+        raise IOError
+
+    return result.stdout.strip()
+
+
 def show_generate_info(env, show_pytest=False):
     peaq_network_node_branch = get_git_branch(os.path.join(env["WORK_DIRECTORY"], "peaq-network-node"))
 
     print(f'{Fore.LIGHTGREEN_EX}Start date{Style.RESET_ALL}: {env["DATETIME"]}')
     print(f'{Fore.LIGHTGREEN_EX}simple-ci-poc branch{Style.RESET_ALL}: '
-          f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "simple-ci-poc"))}')
+          f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "simple-ci-poc"))}-'
+          f'{get_git_commit(os.path.join(env["WORK_DIRECTORY"], "simple-ci-poc"))}')
 
-    print(f'{Fore.LIGHTGREEN_EX}Peaq-network-node branch{Style.RESET_ALL}: {peaq_network_node_branch}')
+    print(f'{Fore.LIGHTGREEN_EX}Peaq-network-node branch{Style.RESET_ALL}: {peaq_network_node_branch}-'
+          f'{get_git_commit(os.path.join(env["WORK_DIRECTORY"], "peaq-network-node"))}')
     if get_git_branch(os.path.join(env["WORK_DIRECTORY"], "peaq-network-node")) != env["PEAQ_NETWORK_NODE_BRANCH"]:
         print(f'{Fore.RED}Error!!! The branch is not equal to the target branch{Style.RESET_ALL}')
         print(f'{Fore.RED}Please check immediately{Style.RESET_ALL}')
         raise IOError
     if show_pytest:
         print(f'{Fore.LIGHTGREEN_EX}peaq-bc-test branch{Style.RESET_ALL}: '
-              f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "peaq-bc-test"))}')
+              f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "peaq-bc-test"))}-'
+              f'{get_git_commit(os.path.join(env["WORK_DIRECTORY"], "peaq-bc-test"))}')
         print(f'{Fore.LIGHTGREEN_EX}parachain-launch branch{Style.RESET_ALL}: '
-              f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "parachain-launch"))}')
+              f'{get_git_branch(os.path.join(env["WORK_DIRECTORY"], "parachain-launch"))}-'
+              f'{get_git_commit(os.path.join(env["WORK_DIRECTORY"], "parachain-launch"))}')
         print(f'{Fore.LIGHTGREEN_EX}venv path{Style.RESET_ALL}: {env["VENV_PATH"]}')
 
     print('')
@@ -149,3 +177,44 @@ def get_wasm_info(runtime_module_path):
         'code_hash': code_hash,
         'full_output': result.stdout
     }
+
+
+def build_node(env, with_evm):
+    if with_evm:
+        command = f'cargo build --release --features "std aura evm-tracing on-chain-release-build"'
+    else:
+        command = f'cargo build --release --features "on-chain-release-build"'
+    with subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'peaq-network-node'),
+        text=True
+    ) as process:
+        for line in process.stdout:
+            print(line, end="")
+        process.wait()
+        if process.returncode:
+            print(f'Error: on {env["WORK_DIRECTORY"]} build failed')
+            raise IOError
+
+
+def pack_peaq_docker_image(env):
+    docker_tag = "peaq_para_node:latest"
+    command = f"docker build -f scripts/Dockerfile.parachain-launch -t {docker_tag} ."
+    result = subprocess.run(
+        command,
+        shell=True,
+        capture_output=True,
+        cwd=os.path.join(env['WORK_DIRECTORY'], 'peaq-network-node'),
+        text=True)
+
+    if result.returncode:
+        print(f'Error: on {os.getcwd()} build failed')
+        raise IOError
+
+    for err_str in ['not found', 'error', 'undefined']:
+        if any(err_str in line.lower() for line in result.stdout):
+            print(f'Error: on {result.stdout} build failed')
+            raise IOError

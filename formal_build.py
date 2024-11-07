@@ -1,9 +1,12 @@
 import os
-from tools.src.utils import get_env, show_generate_info, get_wasm_info
+from tools.src.utils import get_env, show_generate_info, get_wasm_info, build_node
 import subprocess
 from functools import wraps
 from colorama import Fore, Style
 from tools.src.constants import TARGET_WASM_PATH
+
+TARGET_CHAIN = 'peaq-dev'
+FORCE_REMOVE_TARGET_FOLDER = False
 
 
 def print_command(func):
@@ -18,8 +21,6 @@ def print_command(func):
 
 
 subprocess.Popen = print_command(subprocess.Popen)
-
-TARGET_CHAIN = 'peaq-dev'
 
 
 def check_node_modified(env):
@@ -51,27 +52,6 @@ def checkout_node_branch(env):
         raise IOError
 
 
-def build_node(env, with_evm):
-    if with_evm:
-        command = f'cargo build --release --features "std aura evm-tracing on-chain-release-build"'
-    else:
-        command = f'cargo build --release --features "on-chain-release-build"'
-    with subprocess.Popen(
-        command,
-        shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        cwd=os.path.join(env['WORK_DIRECTORY'], 'peaq-network-node'),
-        text=True
-    ) as process:
-        for line in process.stdout:
-            print(line, end="")
-        process.wait()
-        if process.returncode:
-            print(f'Error: on {env["WORK_DIRECTORY"]} build failed')
-            raise IOError
-
-
 def cp_peaq_wasm_bin(env, wasm_info, suffix=''):
     if suffix:
         suffix = f'-{suffix}'
@@ -91,6 +71,19 @@ def cp_peaq_wasm_bin(env, wasm_info, suffix=''):
         'wasm_path': result.stdout.split('\n')[0].split()[-1],
         'binary_path': result.stdout.split('\n')[1].split()[-1],
     }
+
+
+def force_remove_target_folder(env):
+    command = f'rm -rf {os.path.join(env["WORK_DIRECTORY"], "peaq-network-node", "target")}'
+    result = subprocess.run(
+        command,
+        shell=True,
+        capture_output=True,
+        text=True)
+
+    if result.returncode:
+        print(f'Error: on {env["WORK_DIRECTORY"]} {result.stderr}')
+        raise IOError
 
 
 def show_report(wasm_info, cp_path_info, with_evm):
@@ -116,15 +109,19 @@ if __name__ == '__main__':
 
     build_runtime_path = os.path.join(env_dict['WORK_DIRECTORY'], 'peaq-network-node', TARGET_WASM_PATH[TARGET_CHAIN])
 
+    if FORCE_REMOVE_TARGET_FOLDER:
+        force_remove_target_folder(env_dict)
     # Cargo build with evm
     build_node(env_dict, with_evm=True)
     wasm_info_wi_evm = get_wasm_info(build_runtime_path)
     cp_path_info_wi_evm = cp_peaq_wasm_bin(env_dict, wasm_info_wi_evm, 'evm')
 
-    # # Cargo build without evm
-    # build_node(env_dict, with_evm=False)
-    # wasm_info_wo_evm = get_wasm_info(build_runtime_path)
-    # cp_path_info_wo_evm = cp_peaq_wasm_bin(env_dict, wasm_info_wo_evm)
+    if FORCE_REMOVE_TARGET_FOLDER:
+        force_remove_target_folder(env_dict)
+    # Cargo build without evm
+    build_node(env_dict, with_evm=False)
+    wasm_info_wo_evm = get_wasm_info(build_runtime_path)
+    cp_path_info_wo_evm = cp_peaq_wasm_bin(env_dict, wasm_info_wo_evm)
 
     show_generate_info(env_dict)
     show_report(wasm_info_wi_evm, cp_path_info_wi_evm, with_evm=True)
