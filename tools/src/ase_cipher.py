@@ -15,7 +15,7 @@ def pad(s):
 
 def unpad(s):
     s = s.decode("utf-8")
-    return s[0: -ord(s[-1])]
+    return s[0 : -ord(s[-1])]
 
 
 class AESCipher:
