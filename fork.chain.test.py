@@ -5,23 +5,13 @@ from tools.src.utils import get_env, show_generate_info, build_node
 from tools.src.forked_chain_utils import compose_forked_scripts_config_path
 from tools.src.forked_chain_utils import compose_forked_binary_folder
 from tools.src.forked_chain_utils import execute_forked_test_parachain_launch
+from tools.src.forked_chain_utils import parachain_down
 from tools.src.utils import wait_for_parachain_ready, wait_for_doctor_ready
 from tools.src.test_utils import pytest_wi_runtime_module
 from tools.src.constants import TARGET_WASM_PATH
 from tools.src.utils import get_wasm_info
+from tools.src.utils import print_command
 import os
-
-
-def print_command(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        command = args[0] if args else kwargs.get("args", None)
-        if command:
-            print(f"{Fore.YELLOW}Executing command:{Style.RESET_ALL} {command}")
-
-        return func(*args, **kwargs)
-
-    return wrapper
 
 
 subprocess.Popen = print_command(subprocess.Popen)
@@ -89,6 +79,8 @@ if __name__ == "__main__":
     pytest_result = pytest_wi_runtime_module(
         TARGET_CHAIN, env_dict, venv_path, runtime_module_path, PYTEST_ARGUMENTS
     )
+
+    parachain_down(TARGET_CHAIN, remove_folder=True)
 
     show_generate_info(env_dict, show_pytest=True)
     show_report(wasm_info, runtime_module_path, pytest_result, PYTEST_ARGUMENTS)

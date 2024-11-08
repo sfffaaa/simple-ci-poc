@@ -1,5 +1,4 @@
 import subprocess
-from functools import wraps
 from colorama import Fore, Style
 from tools.src.utils import (
     get_env,
@@ -8,23 +7,13 @@ from tools.src.utils import (
     pack_peaq_docker_image,
 )
 from tools.src.forked_chain_utils import execute_new_test_parachain_launch
+from tools.src.forked_chain_utils import parachain_down
 from tools.src.utils import wait_for_parachain_ready, wait_for_doctor_ready
 from tools.src.test_utils import pytest_wo_runtime_module
 from tools.src.constants import TARGET_WASM_PATH
 from tools.src.utils import get_wasm_info
 import os
-
-
-def print_command(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        command = args[0] if args else kwargs.get("args", None)
-        if command:
-            print(f"{Fore.YELLOW}Executing command:{Style.RESET_ALL} {command}")
-
-        return func(*args, **kwargs)
-
-    return wrapper
+from tools.src.utils import print_command
 
 
 subprocess.Popen = print_command(subprocess.Popen)
@@ -57,7 +46,7 @@ def show_report(wasm_info, pytest_result, pytest_test_arguments):
 if __name__ == "__main__":
     env_dict = get_env()
 
-    print(f"============ {Fore.GREEN}Formal build start {Style.RESET_ALL} ============")
+    print(f"============ {Fore.GREEN}Fork test start {Style.RESET_ALL} ============")
     print("")
     show_generate_info(env_dict, show_pytest=True)
 
@@ -79,6 +68,8 @@ if __name__ == "__main__":
     pytest_result = pytest_wo_runtime_module(
         TARGET_CHAIN, env_dict, venv_path, PYTEST_ARGUMENTS
     )
+
+    parachain_down(env_dict, remove_folder=True)
 
     show_generate_info(env_dict, show_pytest=True)
     show_report(wasm_info, pytest_result, PYTEST_ARGUMENTS)

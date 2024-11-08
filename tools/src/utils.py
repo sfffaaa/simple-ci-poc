@@ -1,6 +1,7 @@
 import os
 import datetime
 from colorama import Fore, Style
+from functools import wraps
 import subprocess
 import json
 import time
@@ -162,20 +163,32 @@ def wait_for_doctor_ready(chain_name):
 
 
 def wait_for_parachain_ready(chain_name):
+    wait_for_parachain_ready_imp(chain_name, 10044)
+
+
+def wait_for_evm_node_ready(chain_name):
+    wait_for_parachain_ready_imp(chain_name, 20044)
+
+
+def wait_for_parachain_ready_imp(chain_name, port):
     print(
         f"{Fore.LIGHTCYAN_EX} Wait for the parachain start to genererate block {Style.RESET_ALL}"
     )
+    error_count = 0
     for i in range(0, 120):
         time.sleep(6)
         result = subprocess.run(
-            f'curl -H \'Content-Type: application/json\' -d \'{{"jsonrpc":"2.0","method":"chain_getHeader","params":[],"id":1}}\' http://localhost:10044',
+            f'curl -H \'Content-Type: application/json\' -d \'{{"jsonrpc":"2.0","method":"chain_getHeader","params":[],"id":1}}\' http://localhost:{port}',
             shell=True,
             capture_output=True,
             text=True,
         )
         if result.returncode:
             print(f"Error: on {result.stderr}")
-            raise IOError(f"Error: on {result.stderr}")
+            error_count += 1
+            if error_count == 20:
+                raise IOError(f"Error: on {result.stderr}")
+            continue
         if "0x0" == json.loads(result.stdout)["result"]["number"]:
             if i % 10 == 0:
                 print(
@@ -217,6 +230,7 @@ def build_node(env, with_evm):
         command = f'cargo build --release --features "std aura evm-tracing on-chain-release-build"'
     else:
         command = f'cargo build --release --features "on-chain-release-build"'
+    output = []
     with subprocess.Popen(
         command,
         shell=True,
@@ -227,6 +241,7 @@ def build_node(env, with_evm):
     ) as process:
         for line in process.stdout:
             print(line, end="")
+            output.append(line.strip())
         process.wait()
         if process.returncode:
             print(f'Error: on {env["WORK_DIRECTORY"]} build failed')
@@ -236,6 +251,7 @@ def build_node(env, with_evm):
 def pack_peaq_docker_image(env):
     docker_tag = "peaq_para_node:latest"
     command = f"docker build -f scripts/Dockerfile.parachain-launch -t {docker_tag} ."
+    output = []
     with subprocess.Popen(
         command,
         shell=True,
@@ -246,7 +262,53 @@ def pack_peaq_docker_image(env):
     ) as process:
         for line in process.stdout:
             print(line, end="")
+            output.append(line.strip())
         process.wait()
         if process.returncode:
             print(f'Error: on {env["WORK_DIRECTORY"]} build failed')
             raise IOError
+
+
+def print_command(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        command = args[0] if args else kwargs.get("args", None)
+        if command:
+            print(f"{Fore.YELLOW}Executing command:{Style.RESET_ALL} {command}")
+
+        return func(*args, **kwargs)
+
+    return wrapper
+
+
+def check_node_modified(env_dict):
+    command = "git diff --quiet && git diff --cached --quiet"
+    result = subprocess.run(
+        command,
+        shell=True,
+        cwd=os.path.join(env_dict["WORK_DIRECTORY"], "peaq-network-node"),
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode:
+        print(
+            "The work directory has been modified. Please commit the changes before building."
+        )
+        print(f'Error: on {env_dict["WORK_DIRECTORY"]} {result.stderr}')
+        raise IOError
+
+
+def checkout_node_branch(env):
+    command = f'git checkout {env["PEAQ_NETWORK_NODE_BRANCH"]}'
+    result = subprocess.run(
+        command,
+        shell=True,
+        cwd=os.path.join(env["WORK_DIRECTORY"], "peaq-network-node"),
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode:
+        print(f'Error: on {env["WORK_DIRECTORY"]} {result.stderr}')
+        raise IOError

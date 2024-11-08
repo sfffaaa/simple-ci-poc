@@ -1,1 +1,2 @@
 colorama=0.4.6
+python-on-whales==0.73.0

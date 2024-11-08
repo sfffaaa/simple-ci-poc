@@ -1,60 +1,17 @@
 import os
 from tools.src.utils import get_env, show_generate_info, get_wasm_info, build_node
 import subprocess
-from functools import wraps
 from colorama import Fore, Style
 from tools.src.constants import TARGET_WASM_PATH
+from tools.src.utils import print_command
+from tools.src.utils import check_node_modified
+from tools.src.utils import checkout_node_branch
 
 TARGET_CHAIN = "peaq-dev"
 FORCE_REMOVE_TARGET_FOLDER = False
 
 
-def print_command(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        command = args[0] if args else kwargs.get("args", None)
-        if command:
-            print(f"{Fore.YELLOW}Executing command:{Style.RESET_ALL} {command}")
-
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
 subprocess.Popen = print_command(subprocess.Popen)
-
-
-def check_node_modified(env):
-    command = "git diff --quiet && git diff --cached --quiet"
-    result = subprocess.run(
-        command,
-        shell=True,
-        cwd=os.path.join(env_dict["WORK_DIRECTORY"], "peaq-network-node"),
-        capture_output=True,
-        text=True,
-    )
-
-    if result.returncode:
-        print(
-            "The work directory has been modified. Please commit the changes before building."
-        )
-        print(f'Error: on {env_dict["WORK_DIRECTORY"]} {result.stderr}')
-        raise IOError
-
-
-def checkout_node_branch(env):
-    command = f'git checkout {env["PEAQ_NETWORK_NODE_BRANCH"]}'
-    result = subprocess.run(
-        command,
-        shell=True,
-        cwd=os.path.join(env["WORK_DIRECTORY"], "peaq-network-node"),
-        capture_output=True,
-        text=True,
-    )
-
-    if result.returncode:
-        print(f'Error: on {env["WORK_DIRECTORY"]} {result.stderr}')
-        raise IOError
 
 
 def cp_peaq_wasm_bin(env, wasm_info, suffix=""):
@@ -83,7 +40,7 @@ def force_remove_target_folder(env):
 
     if result.returncode:
         print(f'Error: on {env["WORK_DIRECTORY"]} {result.stderr}')
-        raise IOError
+        print(f'However, we can ignore this error')
 
 
 def show_report(wasm_info, cp_path_info, with_evm):
@@ -135,6 +92,4 @@ if __name__ == "__main__":
 
     show_generate_info(env_dict)
     show_report(wasm_info_wi_evm, cp_path_info_wi_evm, with_evm=True)
-    # show_report(wasm_info_wo_evm, cp_path_info_wo_evm, with_evm=False)
-
-    # Link the CI path
+    show_report(wasm_info_wo_evm, cp_path_info_wo_evm, with_evm=False)

@@ -13,6 +13,12 @@ WSS_ENDPOINT = {
 
 PARACHAIN_ID = {"peaq-dev": 2000, "krest": 2241, "peaq": 3338}
 
+PARACHAIN_LAUNCH_DOCKER_COMPOSE_CHAIN_SPEC = {
+    'peaq-dev': 'dev-local-2000.json',
+    'krest': 'krest-local-2241.json',
+    'peaq': 'peaq-local-3338.json',
+}
+
 
 TARGET_WASM_PATH = {
     "peaq-dev": "target/release/wbuild/peaq-dev-runtime/peaq_dev_runtime.compact.compressed.wasm",
